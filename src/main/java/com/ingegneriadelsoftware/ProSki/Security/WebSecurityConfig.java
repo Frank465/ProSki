@@ -28,8 +28,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/v*/registrazione/**")
                 .permitAll()
                 .anyRequest()
-                .authenticated()
-                .and()
+                .authenticated().and()
                 .formLogin();
         return http.build();
     }

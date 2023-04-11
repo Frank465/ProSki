@@ -21,8 +21,6 @@ public class EmailService implements EmailSender {
     private final static Logger LOGGER = LoggerFactory
             .getLogger(EmailService.class);
 
-
-    //TODO: Capire come funziona JavaMailSender che non funziona
     private final JavaMailSender mailSender;
 
     @Override

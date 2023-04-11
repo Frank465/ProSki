@@ -2,9 +2,7 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneRequest;
 import com.ingegneriadelsoftware.ProSki.Service.RegistrazioneService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

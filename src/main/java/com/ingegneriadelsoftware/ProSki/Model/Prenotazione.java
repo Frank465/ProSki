@@ -6,7 +6,9 @@ import lombok.*;
 import java.util.*;
 
 
-/* La prenotazione di sci/snowboard avviene su un rifornitore e riguarda i suoi sci/snowboard */
+/**
+ *  La prenotazione di sci/snowboard avviene su un rifornitore e riguarda i suoi sci/snowboard
+ **/
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,5 +29,4 @@ public class Prenotazione {
     private List<Snowboard> snowboardprenotati;
     private Date data;
     private Date ora;
-
 }

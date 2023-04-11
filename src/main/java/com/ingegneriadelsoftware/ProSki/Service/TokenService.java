@@ -1,6 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.Model.Token;
+import com.ingegneriadelsoftware.ProSki.Model.Utente;
 import com.ingegneriadelsoftware.ProSki.Repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class TokenService {
 
     private final TokenRepository tokenRepository;
+
 
     /**
      * il token creato viene aggiunto nel DB, ma non convalidato
@@ -28,7 +30,7 @@ public class TokenService {
      * @return Token
      */
     public Optional<Token> getToken(String token) {
-        return tokenRepository.findByToken(token);
+        return tokenRepository.findTokenByTokenName(token);
     }
 
     /**
@@ -38,5 +40,16 @@ public class TokenService {
     public void setConfirmedAt(String token) {
         tokenRepository.updateConfirmedAt(
                 token, LocalDateTime.now());
+    }
+
+    public Token findTokenByUtente(Utente utente) {
+        Optional<Token> token = tokenRepository.findTokenByUtente(utente);
+        if(token.isEmpty())
+            throw new IllegalStateException("Token non trovato");
+        return token.get();
+    }
+
+    public void deleteToken(String token) {
+        tokenRepository.deleteTokenByTokenName(token);
     }
 }

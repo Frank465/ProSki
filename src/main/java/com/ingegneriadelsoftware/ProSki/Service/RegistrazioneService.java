@@ -26,7 +26,6 @@ public class RegistrazioneService {
     private final EmailSender emailSend;
     private final BuildEmail buildEmail;
 
-
     /**
      * Registra utente con email come identificativo e controlla l'eventuale presenza
      * @param request
@@ -36,18 +35,22 @@ public class RegistrazioneService {
         boolean isValid = validazioneEmail.test(request.getEmail());
         if(!isValid)
             throw new IllegalStateException("l'email non è valida");
-        String token =  utenteSevice.iscrizione(
-                new Utente(request.getNome(), request.getCognome(), request.getPassword(), request.getEmail(), Ruolo.USER));
+
+        String token = utenteSevice.iscrizione(new Utente(
+                request.getNome(),
+                request.getCognome(),
+                request.getPassword(),
+                request.getEmail(),
+                Ruolo.USER));
+
         String link = "http://localhost:8080/api/v1/registrazione/confirm?token=" + token;
         emailSend.send(request.getEmail(), buildEmail.create(request.getNome(), link));
 
         return token;
-
     }
 
     /**
      * Conferma la registrazione di un utente dopo che ha verificato tramite email
-     * @param token
      * @return conferma registrazione
      */
     @Transactional
@@ -59,9 +62,10 @@ public class RegistrazioneService {
 
         LocalDateTime expiredAt = confirmToken.getExpiresAt();
 
-        if(expiredAt.isBefore(LocalDateTime.now()))
+        if(expiredAt.isBefore(LocalDateTime.now())) {
+            tokenService.deleteToken(token);
             throw new IllegalStateException("token scaduto");
-
+        }
         tokenService.setConfirmedAt(token);
         utenteSevice.abilitaUtente(confirmToken.getUtente().getEmail());
 

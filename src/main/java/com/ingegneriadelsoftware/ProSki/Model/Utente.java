@@ -41,6 +41,7 @@ public class Utente implements UserDetails {
     private boolean locked = false;
     private boolean enable = false;
 
+
     public Utente(String nome, String cognome, String password, String email, Ruolo ruolo) {
         this.nome = nome;
         this.cognome = cognome;
