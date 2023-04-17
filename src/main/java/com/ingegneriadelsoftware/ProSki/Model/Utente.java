@@ -26,19 +26,18 @@ public class Utente implements UserDetails {
             generator = "utente_sequence"
     )
     private Integer utenteId;
-    @Column
+    @Column(nullable = false)
     private String nome;
-    @Column
+    @Column(nullable = false)
     private String cognome;
-    @Column
+    @Column(nullable = false)
     private String password;
-    @Column
+    @Column(nullable = false, unique = true)
     private String email;
     @OneToMany(mappedBy = "utente")
     private List<Prenotazione> prenotazioni;
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
-    private boolean locked = false;
     private boolean enable = false;
 
 
@@ -67,7 +66,7 @@ public class Utente implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !locked;
+        return true;
     }
 
     @Override
