@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class UtenteService implements UserDetailsService {
@@ -26,9 +28,9 @@ public class UtenteService implements UserDetailsService {
 
     @Transactional
     public Utente iscrizione(Utente utente) {
-        UserDetails utenteEsiste = loadUserByUsername(utente.getEmail());
+        Optional<Utente> utenteEsiste = utenteRepository.findUserByEmail(utente.getEmail());
 
-        if(utenteEsiste != null && utenteEsiste.isEnabled())
+        if(utenteEsiste.isPresent() && utenteEsiste.get().isEnable())
             throw new IllegalStateException("l'email inserita è già presente");
 
         utente.setPassword(passwordEncoder.encode(utente.getPassword()));

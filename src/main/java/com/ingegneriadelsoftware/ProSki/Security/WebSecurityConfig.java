@@ -24,7 +24,7 @@ public class WebSecurityConfig {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v*/auth/**")
+                .requestMatchers("/api/v*/profilo/**")
                 .permitAll()
                 .and()
                 .sessionManagement()

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class Profilo {
     private final ProfiloService profiloService;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<RegistrazioneResponse> registrazione(@RequestBody RegistrazioneRequest request) {
         return ResponseEntity.ok(profiloService.registrazione(request));
     }

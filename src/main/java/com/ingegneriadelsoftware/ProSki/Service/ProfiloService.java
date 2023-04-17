@@ -16,6 +16,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * Service che si occupa della registrazione, conferma e login di un utente
+ */
 @Service
 @RequiredArgsConstructor
 public class ProfiloService {
@@ -33,7 +37,7 @@ public class ProfiloService {
     /**
      * Registra utente con email come identificativo e controlla l'eventuale presenza
      * @param request
-     * @return String, è il token che viene associato all'utente
+     * @return RegistrazioneResponse contiene un attributo token di tipo String
      */
     public RegistrazioneResponse registrazione(@NotNull RegistrazioneRequest request){
         boolean isValid = validazioneEmail.test(request.getEmail());
@@ -49,7 +53,7 @@ public class ProfiloService {
 
         String jwtToken = jwtService.generateToken(utente);
 
-        String link = "http://localhost:8080/api/v1/registrazione/confirm?token=" + jwtToken;
+        String link = "http://localhost:8080/api/v1/profilo/confirm?token=" + jwtToken;
         emailSend.send(request.getEmail(), buildEmail.create(request.getNome(), link));
 
         return RegistrazioneResponse.builder()
@@ -58,7 +62,7 @@ public class ProfiloService {
     }
 
     /**
-     * Conferma la registrazione di un utente dopo che ha verificato tramite email
+     * Conferma la registrazione di un utente dopo che ha verificato tramite email, se il token è scaduto l'utente viene eliminato
      * @return String
      */
     public String confermaToken(String token) {
@@ -78,6 +82,10 @@ public class ProfiloService {
         }
     }
 
+    /**
+     * Login di un utente attraverso jwt
+     * @param request
+     */
     public AuthenticationResponse authentication(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

@@ -38,6 +38,7 @@ public class Utente implements UserDetails {
     private List<Prenotazione> prenotazioni;
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
+    private boolean locked = false;
     private boolean enable = false;
 
 
@@ -66,7 +67,7 @@ public class Utente implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !locked;
     }
 
     @Override
