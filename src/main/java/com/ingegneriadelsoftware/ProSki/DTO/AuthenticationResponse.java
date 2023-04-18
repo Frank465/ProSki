@@ -1,7 +1,10 @@
 package com.ingegneriadelsoftware.ProSki.DTO;
 
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -10,5 +13,6 @@ import lombok.*;
 public class AuthenticationResponse {
 
     private String token;
+    private String message = null;
 
 }

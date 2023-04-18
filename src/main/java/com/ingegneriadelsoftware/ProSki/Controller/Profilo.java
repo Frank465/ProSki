@@ -17,7 +17,10 @@ public class Profilo {
 
     @PostMapping("/register")
     public ResponseEntity<RegistrazioneResponse> registrazione(@RequestBody RegistrazioneRequest request) {
-        return ResponseEntity.ok(profiloService.registrazione(request));
+        RegistrazioneResponse response = profiloService.registrazione(request);
+        if(response.getMessage() == null)
+            return ResponseEntity.ok(response);
+        return ResponseEntity.badRequest().body(response);
     }
 
     /**
@@ -32,7 +35,9 @@ public class Profilo {
 
     @PostMapping("/authentication")
     public ResponseEntity<AuthenticationResponse> authenticateRequest(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(profiloService.authentication(request));
+         AuthenticationResponse response = profiloService.authentication(request);
+         if(response.getMessage() == null)
+             return ResponseEntity.ok(response);
+         return ResponseEntity.badRequest().body(response);
     }
-
 }

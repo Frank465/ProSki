@@ -13,10 +13,12 @@ public class ValidazioneEmail implements Predicate<String> {
 
     //Controllo Email
     @Override
-    public boolean test(String email) {
+    public boolean test(String email) throws IllegalArgumentException  {
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        if(!matcher.matches())
+            throw new IllegalArgumentException("Email non valida");
+        return true;
     }
 }

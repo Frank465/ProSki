@@ -4,8 +4,6 @@ import com.ingegneriadelsoftware.ProSki.DTO.AuthenticationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.AuthenticationResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneResponse;
-import com.ingegneriadelsoftware.ProSki.Email.BuildEmail;
-import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
 import com.ingegneriadelsoftware.ProSki.Model.Ruolo;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -30,8 +29,6 @@ public class ProfiloService {
     private final JwtService jwtService;
     private final UtenteService utenteSevice;
     private final ValidazioneEmail validazioneEmail;
-    private final EmailSender emailSend;
-    private final BuildEmail buildEmail;
     private final AuthenticationManager authenticationManager;
 
     /**
@@ -40,21 +37,23 @@ public class ProfiloService {
      * @return RegistrazioneResponse contiene un attributo token di tipo String
      */
     public RegistrazioneResponse registrazione(@NotNull RegistrazioneRequest request){
-        boolean isValid = validazioneEmail.test(request.getEmail());
-        if(!isValid)
-            throw new IllegalStateException("l'email non è valida");
 
-        Utente utente = utenteSevice.iscrizione(new Utente(
-                request.getNome(),
-                request.getCognome(),
-                request.getPassword(),
-                request.getEmail(),
-                Ruolo.USER));
+        String jwtToken;
+        try {
+            validazioneEmail.test(request.getEmail());
+            jwtToken = utenteSevice.iscrizione(new Utente(
+                    request.getNome(),
+                    request.getCognome(),
+                    request.getPassword(),
+                    request.getEmail(),
+                    Ruolo.USER));
 
-        String jwtToken = jwtService.generateToken(utente);
 
-        String link = "http://localhost:8080/api/v1/profilo/confirm?token=" + jwtToken;
-        emailSend.send(request.getEmail(), buildEmail.create(request.getNome(), link));
+        }catch(Exception e){
+            return RegistrazioneResponse.builder()
+                    .message(e.getMessage())
+                    .build();
+        }
 
         return RegistrazioneResponse.builder()
                 .token(jwtToken)
@@ -75,7 +74,8 @@ public class ProfiloService {
         }
         else {
             utenteSevice.deleteByEmail(userEmail);
-            throw new ExpiredJwtException(jwtService.exctractHeader(token),
+            throw new ExpiredJwtException(
+                    jwtService.exctractHeader(token),
                     jwtService.extractAllClaims(token),
                     "Registrare di nuovo l'utente"
             );
@@ -84,20 +84,28 @@ public class ProfiloService {
 
     /**
      * Login di un utente attraverso jwt
+     *
      * @param request
      */
     public AuthenticationResponse authentication(AuthenticationRequest request) {
+        UserDetails user = null;
+        try {
+             user = utenteSevice.loadUserByUsername(request.getEmail());
+        }catch (UsernameNotFoundException unfe) {
+           return AuthenticationResponse.builder()
+                   .message(unfe.getMessage())
+                   .build();
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-        UserDetails user = utenteSevice.loadUserByUsername(request.getEmail());
-
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .message(null)
                 .build();
     }
 }

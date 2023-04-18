@@ -1,5 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
+import com.ingegneriadelsoftware.ProSki.Email.BuildEmail;
+import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
 import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
 import jakarta.transaction.Transactional;
@@ -18,6 +20,9 @@ public class UtenteService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
     private final UtenteRepository utenteRepository;
+    private final JwtService jwtService;
+    private final EmailSender emailSend;
+    private final BuildEmail buildEmail;
     private final String UTENTE_NON_TROVATO_MSG = "utente con email %s non è stato trovato";
 
     @Override
@@ -27,16 +32,22 @@ public class UtenteService implements UserDetailsService {
     }
 
     @Transactional
-    public Utente iscrizione(Utente utente) {
+    public String iscrizione(Utente utente) throws IllegalStateException {
         Optional<Utente> utenteEsiste = utenteRepository.findUserByEmail(utente.getEmail());
 
         if(utenteEsiste.isPresent() && utenteEsiste.get().isEnable())
             throw new IllegalStateException("l'email inserita è già presente");
 
         utente.setPassword(passwordEncoder.encode(utente.getPassword()));
+
+        String jwtToken = jwtService.generateToken(utente);
+
+        String link = "http://localhost:8080/api/v1/profilo/confirm?token=" + jwtToken;
+        emailSend.send(utente.getEmail(), buildEmail.create(utente.getNome(), link));
+
         utenteRepository.save(utente);
 
-        return utente;
+        return jwtToken;
     }
 
     public void abilitaUtente(String email) {

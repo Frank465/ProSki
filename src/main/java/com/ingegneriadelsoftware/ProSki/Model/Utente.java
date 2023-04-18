@@ -26,9 +26,9 @@ public class Utente implements UserDetails {
             generator = "utente_sequence"
     )
     private Integer utenteId;
-    @Column(nullable = false)
+    @Column
     private String nome;
-    @Column(nullable = false)
+    @Column
     private String cognome;
     @Column(nullable = false)
     private String password;
@@ -45,6 +45,11 @@ public class Utente implements UserDetails {
     public Utente(String nome, String cognome, String password, String email, Ruolo ruolo) {
         this.nome = nome;
         this.cognome = cognome;
+        this.password = password;
+        this.email = email;
+        this.ruolo = ruolo;
+    }
+    public Utente(String password, String email, Ruolo ruolo) {
         this.password = password;
         this.email = email;
         this.ruolo = ruolo;
