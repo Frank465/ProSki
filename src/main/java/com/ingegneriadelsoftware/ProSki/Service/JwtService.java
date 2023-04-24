@@ -48,30 +48,19 @@ public class JwtService {
     }
 
     /**
-     * Genera il token per un utente senza Claims aggiuntivi
-     * @param userDetails
-     * @return
-     */
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    /**
-     * Genera il token con i claimsExtra per un utente
-     * @param extraClaims
+     * Genera il token con la data di scadenza
      * @param userDetails
      * @return
      */
     public String generateToken(
-            Map<String, Boolean> extraClaims,
-            UserDetails userDetails
+            UserDetails userDetails,
+            Date expireToken
     ) {
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(expireToken)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

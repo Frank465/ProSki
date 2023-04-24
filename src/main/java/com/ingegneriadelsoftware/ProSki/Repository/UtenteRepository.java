@@ -14,6 +14,7 @@ public interface UtenteRepository extends CrudRepository<Utente, Integer> {
 
     Optional<Utente> findUserByEmail(String email);
 
+
     @Transactional
     @Modifying
     @Query("UPDATE Utente a " +

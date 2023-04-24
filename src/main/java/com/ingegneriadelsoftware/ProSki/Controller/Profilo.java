@@ -30,7 +30,10 @@ public class Profilo {
      */
     @GetMapping("/confirm")
     public ResponseEntity<String> confermaRegistrazione(@RequestParam("token") String token) {
-        return ResponseEntity.ok(profiloService.confermaToken(token));
+        String message = profiloService.confermaToken(token);
+        if(message.equals("confirmed"))
+            return ResponseEntity.ok(message);
+        return ResponseEntity.internalServerError().body(message);
     }
 
     @PostMapping("/authentication")

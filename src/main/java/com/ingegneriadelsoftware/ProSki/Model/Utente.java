@@ -40,6 +40,8 @@ public class Utente implements UserDetails {
     private Ruolo ruolo;
     private boolean locked = false;
     private boolean enable = false;
+    @Column
+    private String token;
 
 
     public Utente(String nome, String cognome, String password, String email, Ruolo ruolo) {
@@ -49,10 +51,11 @@ public class Utente implements UserDetails {
         this.email = email;
         this.ruolo = ruolo;
     }
-    public Utente(String password, String email, Ruolo ruolo) {
+    public Utente(String password, String email, Ruolo ruolo, boolean enable) {
         this.password = password;
         this.email = email;
         this.ruolo = ruolo;
+        this.enable = enable;
     }
 
     @Override

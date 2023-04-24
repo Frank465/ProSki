@@ -34,7 +34,8 @@ public class WebSecurityConfig {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v*/profilo/**").permitAll()
-                .requestMatchers("/api/v2/admin/**").hasRole(Ruolo.ADMIN.toString())
+                .requestMatchers("/api/v2/admin/**").hasAuthority("ADMIN")
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -51,7 +52,9 @@ public class WebSecurityConfig {
             utenteRepository.save(new Utente(
                     passwordEncoder.encode("admin"),
                     "admin@proski.com",
-                    Ruolo.ADMIN)
+                    Ruolo.ADMIN,
+                    true
+                    )
             );
         }
     }

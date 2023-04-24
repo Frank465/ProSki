@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class UtenteService implements UserDetailsService {
     private final BuildEmail buildEmail;
     private final String UTENTE_NON_TROVATO_MSG = "utente con email %s non è stato trovato";
 
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return utenteRepository.findUserByEmail(email).
@@ -34,19 +36,28 @@ public class UtenteService implements UserDetailsService {
     @Transactional
     public String iscrizione(Utente utente) throws IllegalStateException {
         Optional<Utente> utenteEsiste = utenteRepository.findUserByEmail(utente.getEmail());
+        boolean isExpire;
 
-        if(utenteEsiste.isPresent() && utenteEsiste.get().isEnable())
-            throw new IllegalStateException("l'email inserita è già presente");
+        if(utenteEsiste.isPresent()) {
+            isExpire = jwtService.isTokenExpired(utenteEsiste.get().getToken());
+            if (!utenteEsiste.get().isEnable() && isExpire)
+                deleteByEmail(utente.getEmail());
+            else throw new IllegalStateException("l'email inserita è già presente");
+        }
 
         utente.setPassword(passwordEncoder.encode(utente.getPassword()));
 
-        String jwtToken = jwtService.generateToken(utente);
+        String jwtToken = jwtService.generateToken(
+                utente,
+                new Date(System.currentTimeMillis() + 15 * 1000 * 60)
+        );
+
+        utente.setToken(jwtToken);
 
         String link = "http://localhost:8080/api/v1/profilo/confirm?token=" + jwtToken;
         emailSend.send(utente.getEmail(), buildEmail.create(utente.getNome(), link));
 
         utenteRepository.save(utente);
-
         return jwtToken;
     }
 

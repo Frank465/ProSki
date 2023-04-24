@@ -6,14 +6,14 @@ import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneResponse;
 import com.ingegneriadelsoftware.ProSki.Model.Ruolo;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 
 /**
@@ -28,7 +28,6 @@ public class ProfiloService {
      */
     private final JwtService jwtService;
     private final UtenteService utenteSevice;
-    private final ValidazioneEmail validazioneEmail;
     private final AuthenticationManager authenticationManager;
 
     /**
@@ -36,19 +35,16 @@ public class ProfiloService {
      * @param request
      * @return RegistrazioneResponse contiene un attributo token di tipo String
      */
-    public RegistrazioneResponse registrazione(@NotNull RegistrazioneRequest request){
+    public RegistrazioneResponse registrazione(RegistrazioneRequest request){
 
         String jwtToken;
         try {
-            validazioneEmail.test(request.getEmail());
             jwtToken = utenteSevice.iscrizione(new Utente(
                     request.getNome(),
                     request.getCognome(),
                     request.getPassword(),
                     request.getEmail(),
                     Ruolo.USER));
-
-
         }catch(Exception e){
             return RegistrazioneResponse.builder()
                     .message(e.getMessage())
@@ -74,11 +70,7 @@ public class ProfiloService {
         }
         else {
             utenteSevice.deleteByEmail(userEmail);
-            throw new ExpiredJwtException(
-                    jwtService.exctractHeader(token),
-                    jwtService.extractAllClaims(token),
-                    "Registrare di nuovo l'utente"
-            );
+            return "Token scaduto registrare di nuovo l'utente";
         }
     }
 
@@ -88,21 +80,27 @@ public class ProfiloService {
      * @param request
      */
     public AuthenticationResponse authentication(AuthenticationRequest request) {
-        UserDetails user = null;
+        UserDetails user;
+
         try {
-             user = utenteSevice.loadUserByUsername(request.getEmail());
-        }catch (UsernameNotFoundException unfe) {
-           return AuthenticationResponse.builder()
-                   .message(unfe.getMessage())
-                   .build();
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        }catch (AuthenticationException e) {
+            return AuthenticationResponse.builder()
+                    .token(null)
+                    .message(e.getMessage())
+                    .build();
         }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+
+        user = utenteSevice.loadUserByUsername(request.getEmail());
+
+        String jwtToken = jwtService.generateToken(user,
+                new Date(System.currentTimeMillis() + 1000 * 60 * 24)
         );
-        String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message(null)
