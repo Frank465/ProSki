@@ -14,12 +14,18 @@ public interface UtenteRepository extends CrudRepository<Utente, Integer> {
 
     Optional<Utente> findUserByEmail(String email);
 
-
     @Transactional
     @Modifying
     @Query("UPDATE Utente a " +
             "SET a.enable = TRUE WHERE a.email = ?1")
     int enableUtente(String email);
 
-    void deleteUtenteByEmail(String email);
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Utente a WHERE a.email = ?1")
+    void deleteByEmail(String email);
+
+    Optional<Utente> findByToken(String token);
+
+
 }

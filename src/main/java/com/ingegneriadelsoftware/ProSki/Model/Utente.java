@@ -58,6 +58,10 @@ public class Utente implements UserDetails {
         this.enable = enable;
     }
 
+    public Utente(String email, String password) {
+
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(ruolo.name()));

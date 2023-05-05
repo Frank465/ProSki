@@ -1,7 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -23,9 +21,6 @@ public class JwtService {
      */
     private final String SECRET_KEY = "6A576E5A7134743777217A25432A462D4A614E645267556B5870327335753878";
 
-    public Header exctractHeader(String token) {
-        return Jwts.parser().parseClaimsJwt(token).getHeader();
-    }
     /**
      * Estrae l'email dal token, l'email è contenuta nel claims come soggetto
      * @param token
@@ -42,7 +37,7 @@ public class JwtService {
      * @return
      * @param <T>
      */
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }

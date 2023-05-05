@@ -2,34 +2,19 @@ package com.ingegneriadelsoftware.ProSki.Model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-public class Maestro {
-
+public class Skipass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column
-    private String nome;
-
-    @Column
-    private String cognome;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column
-    private String specialita;
-
+    @Column(unique = true, nullable = false)
+    private String codiceTessera;
     @ManyToOne
     @JoinColumn(name = "id_localita")
     private Localita localita;

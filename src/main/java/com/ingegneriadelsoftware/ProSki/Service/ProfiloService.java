@@ -1,14 +1,16 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
-import com.ingegneriadelsoftware.ProSki.DTO.AuthenticationRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.AuthenticationResponse;
-import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.RegistrazioneResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.AuthenticationRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.RegistrazioneRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.AuthenticationResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.RegistrazioneResponse;
 import com.ingegneriadelsoftware.ProSki.Model.Ruolo;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -35,21 +37,17 @@ public class ProfiloService {
      * @param request
      * @return RegistrazioneResponse contiene un attributo token di tipo String
      */
-    public RegistrazioneResponse registrazione(RegistrazioneRequest request){
-
+    public RegistrazioneResponse registrazione(RegistrazioneRequest request) throws IllegalStateException{
         String jwtToken;
-        try {
-            jwtToken = utenteSevice.iscrizione(new Utente(
+
+        jwtToken = utenteSevice.iscrizione(
+                new Utente(
                     request.getNome(),
                     request.getCognome(),
                     request.getPassword(),
                     request.getEmail(),
-                    Ruolo.USER));
-        }catch(Exception e){
-            return RegistrazioneResponse.builder()
-                    .message(e.getMessage())
-                    .build();
-        }
+                    Ruolo.USER)
+        );
 
         return RegistrazioneResponse.builder()
                 .token(jwtToken)
@@ -60,50 +58,44 @@ public class ProfiloService {
      * Conferma la registrazione di un utente dopo che ha verificato tramite email, se il token è scaduto l'utente viene eliminato
      * @return String
      */
-    public String confermaToken(String token) {
-        boolean isExpired = jwtService.isTokenExpired(token);
-        String userEmail = jwtService.exctractUsername(token);
+    public void confermaToken(String token) throws IllegalStateException {
+        Utente utente = utenteSevice.findUtenteByToken(token);
 
-        if(!isExpired) {
-            utenteSevice.abilitaUtente(userEmail);
-            return "confirmed";
+        if(utente == null) throw new IllegalStateException("Utente non esiste");
+        if(utente.isEnable()) throw new IllegalStateException("l'utente è gia registrato");
+
+        try{
+            jwtService.isTokenValid(token, utente);
+        }catch(ExpiredJwtException e) {
+            utenteSevice.deleteUtenteByEmail(utente.getEmail());
+            throw new IllegalStateException("Token scaduto, registrazione fallita");
         }
-        else {
-            utenteSevice.deleteByEmail(userEmail);
-            return "Token scaduto registrare di nuovo l'utente";
-        }
+        utenteSevice.abilitaUtente(utente.getEmail());
     }
 
     /**
      * Login di un utente attraverso jwt
-     *
      * @param request
      */
-    public AuthenticationResponse authentication(AuthenticationRequest request) {
+    public AuthenticationResponse authentication(AuthenticationRequest request) throws AuthenticationException {
         UserDetails user;
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
-                    )
-            );
-        }catch (AuthenticationException e) {
-            return AuthenticationResponse.builder()
-                    .token(null)
-                    .message(e.getMessage())
-                    .build();
-        }
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
 
-        user = utenteSevice.loadUserByUsername(request.getEmail());
+        user = (UserDetails) auth.getPrincipal();
 
-        String jwtToken = jwtService.generateToken(user,
+        String jwtToken = jwtService.generateToken(
+                user,
                 new Date(System.currentTimeMillis() + 1000 * 60 * 24)
         );
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .message(null)
                 .build();
     }
 }

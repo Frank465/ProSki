@@ -4,11 +4,10 @@ import com.ingegneriadelsoftware.ProSki.Email.BuildEmail;
 import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
 import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
-import jakarta.transaction.Transactional;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,25 +23,36 @@ public class UtenteService implements UserDetailsService {
     private final JwtService jwtService;
     private final EmailSender emailSend;
     private final BuildEmail buildEmail;
-    private final String UTENTE_NON_TROVATO_MSG = "utente con email %s non è stato trovato";
+
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws IllegalStateException {
         return utenteRepository.findUserByEmail(email).
-                orElseThrow(()-> new UsernameNotFoundException(String.format(UTENTE_NON_TROVATO_MSG, email)));
+                orElseThrow(()-> new IllegalStateException("l'utente non è stato trovato"));
     }
 
-    @Transactional
+    /**
+     * Controllo se l'utente è già registrato.
+     * Per ogni utente che si può registrare viene generato un token che ha validità 15 minuti.
+     * Invio della mail per la registrazione all'indirizzo di posta elettronica.
+     * @param utente
+     * @return String
+     * @throws IllegalStateException
+     */
     public String iscrizione(Utente utente) throws IllegalStateException {
         Optional<Utente> utenteEsiste = utenteRepository.findUserByEmail(utente.getEmail());
-        boolean isExpire;
 
         if(utenteEsiste.isPresent()) {
-            isExpire = jwtService.isTokenExpired(utenteEsiste.get().getToken());
-            if (!utenteEsiste.get().isEnable() && isExpire)
-                deleteByEmail(utente.getEmail());
-            else throw new IllegalStateException("l'email inserita è già presente");
+            if (utenteEsiste.get().isEnable())
+                throw new IllegalStateException("l'utente esiste");
+            try {
+                jwtService.isTokenValid(utenteEsiste.get().getToken(), utenteEsiste.get());
+            } catch (ExpiredJwtException e) {
+                deleteUtenteByEmail(utenteEsiste.get().getEmail());
+                throw new IllegalStateException("token precedente scaduto, registrare nuovamente l'utente");
+            }
+            throw new IllegalStateException("l'utente esiste");
         }
 
         utente.setPassword(passwordEncoder.encode(utente.getPassword()));
@@ -65,7 +75,15 @@ public class UtenteService implements UserDetailsService {
         utenteRepository.enableUtente(email);
     }
 
-    public void deleteByEmail(String email) {
-        utenteRepository.deleteUtenteByEmail(email);
+    public void deleteUtenteByEmail(String email) {
+        utenteRepository.deleteByEmail(email);
     }
+
+    public Utente findUtenteByToken(String token) {
+        Optional<Utente> utente = utenteRepository.findByToken(token);
+        if(utente.isPresent())
+            return utente.get();
+        return null;
+    }
+
 }

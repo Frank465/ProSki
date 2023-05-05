@@ -1,4 +1,4 @@
-package com.ingegneriadelsoftware.ProSki.DTO;
+package com.ingegneriadelsoftware.ProSki.DTO.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class RegistrazioneResponse {
 
     private String token;
-    private String message = null;
+
 }
