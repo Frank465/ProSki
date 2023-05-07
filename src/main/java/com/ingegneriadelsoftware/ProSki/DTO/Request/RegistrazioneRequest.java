@@ -31,7 +31,7 @@ public class RegistrazioneRequest {
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = Utils.REGEX_EMAIL)
+    @Pattern(regexp = Utils.REGEX_EMAIL, message = Utils.ERROR_EMAIL)
     private String email;
 
 }

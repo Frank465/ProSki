@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class RegistrazioneResponse {
 
     private String token;
+    private String message;
 
 }

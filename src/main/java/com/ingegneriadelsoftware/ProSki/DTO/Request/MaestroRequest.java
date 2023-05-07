@@ -25,7 +25,7 @@ public class MaestroRequest {
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = Utils.REGEX_EMAIL, message = "formato mail non valido")
+    @Pattern(regexp = Utils.REGEX_EMAIL, message = Utils.ERROR_EMAIL)
     private String email;
 
     @NotNull

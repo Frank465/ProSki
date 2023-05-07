@@ -2,6 +2,8 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.AuthenticationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.RegistrazioneRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.AuthenticationResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.RegistrazioneResponse;
 import com.ingegneriadelsoftware.ProSki.Service.ProfiloService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +19,17 @@ public class ProfiloController {
     private final ProfiloService profiloService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registrazione(@Valid @RequestBody RegistrazioneRequest request) {
+    public ResponseEntity<RegistrazioneResponse> registrazione(@Valid @RequestBody RegistrazioneRequest request) {
 
         try {
             return ResponseEntity.ok(profiloService.registrazione(request));
         }catch(IllegalStateException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    RegistrazioneResponse
+                            .builder()
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -47,11 +54,16 @@ public class ProfiloController {
      * @return
      */
     @PostMapping("/authentication")
-    public ResponseEntity<?> authenticateRequest(@Valid @RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> authenticateRequest(@Valid @RequestBody AuthenticationRequest request) {
         try{
             return ResponseEntity.ok(profiloService.authentication(request));
         }catch (AuthenticationException unf){
-            return new ResponseEntity<>("L'utente non esiste", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    AuthenticationResponse
+                            .builder()
+                            .message(unf.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST);
         }
     }
 }

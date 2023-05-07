@@ -3,6 +3,8 @@ package com.ingegneriadelsoftware.ProSki.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,21 +14,14 @@ public class Sci {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column
     private Double misura;
+    @Column
+    private boolean enable = true;
     @ManyToOne
     @JoinColumn(name = "id_rifornitore", nullable = false)
     private Rifornitore rifornitore;
-    @ManyToOne
-    @JoinColumn(name = "id_prenotazione")
-    private Prenotazione prenotazione;
+    @ManyToMany
+    private List<Prenotazione> prenotazione;
 
-
-    @Override
-    public String toString() {
-        return "Sci{" +
-                "id=" + id +
-                ", misura=" + misura +
-                ", rifornitore=" + rifornitore +
-                '}';
-    }
 }

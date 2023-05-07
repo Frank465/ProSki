@@ -3,6 +3,7 @@ package com.ingegneriadelsoftware.ProSki.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.*;
 
 
@@ -23,10 +24,12 @@ public class Prenotazione {
     @ManyToOne
     @JoinColumn(name = "id_rifornitore", nullable = false)
     private Rifornitore rifornitore;
-    @OneToMany(mappedBy = "prenotazione")
+    @ManyToMany
     private List<Sci> sciPrenotati;
-    @OneToMany(mappedBy = "prenotazione")
+    @ManyToMany
     private List<Snowboard> snowboardprenotati;
-    private Date data;
-    private Date ora;
+    @Column
+    private LocalDate dataInizio;
+    @Column
+    private LocalDate dataFine;
 }
