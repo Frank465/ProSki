@@ -1,9 +1,11 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.AttrezzatureRifornitoreRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
+import com.ingegneriadelsoftware.ProSki.Model.Attrezzature;
 import com.ingegneriadelsoftware.ProSki.Model.Localita;
 import com.ingegneriadelsoftware.ProSki.Model.Maestro;
 import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
@@ -49,7 +51,7 @@ public class AdminController {
         Maestro maestro = DTOManager.getMaestroByMaestroRequest(request);
         try{
             return ResponseEntity.ok(maestroService.inserisciMaestro(maestro, request.getLocalita()));
-        }catch(IllegalStateException ex) {
+        }catch(IllegalStateException | EntityNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(),HttpStatus.UNAUTHORIZED);
         }
     }
@@ -59,8 +61,17 @@ public class AdminController {
         Rifornitore rifornitore = DTOManager.getRifornitoreByRifornitoreRequest(request);
         try{
             return ResponseEntity.ok(rifornitoreService.inserisciRifornitore(rifornitore));
-        }catch(IllegalStateException ex) {
+        }catch(IllegalStateException | EntityNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/insert/attrezzaturaRifornitore")
+    public ResponseEntity<?> updateAttrezzatureRifornitore(@Valid @RequestBody AttrezzatureRifornitoreRequest request) {
+        try {
+            return ResponseEntity.ok(rifornitoreService.createAttrezzature(request));
+        }catch(IllegalStateException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

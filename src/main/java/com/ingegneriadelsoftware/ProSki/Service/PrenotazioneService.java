@@ -2,16 +2,18 @@ package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Response.AttrezzaturaDisponibileResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.PrenotazioneResponse;
+import com.ingegneriadelsoftware.ProSki.Model.Attrezzature;
 import com.ingegneriadelsoftware.ProSki.Model.Prenotazione;
-import com.ingegneriadelsoftware.ProSki.Model.Sci;
-import com.ingegneriadelsoftware.ProSki.Model.Snowboard;
+import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
 import com.ingegneriadelsoftware.ProSki.Repository.PrenotazioneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.BiPredicate;
 
 
 /**
@@ -27,49 +29,51 @@ public class PrenotazioneService {
 
 
     /**
-     * Il metodo
+     * Il metodo crea una prenotazione solo nel caso in cui, per un determinato rifornitore, tutti gli elementi della lista delle attrezzature siano disponibili
      * @param prenotazione
-     * @return
+     * @return PrenotazioneResponse
      */
     public PrenotazioneResponse creaPrenotazione(Prenotazione prenotazione) {
-        //Ritorna la lista di sci e snowboard disponibili del rifornitore rifornitore
+        //Controllo rifornitore
+        Rifornitore rifornitore = rifornitoreService.getRifornitoreByEmail(prenotazione.getRifornitore().getEmail());
+
+        //Controllo date
+        if(errorDataPrenotazione(prenotazione.getDataInizio(), prenotazione.getDataFine()))
+            throw new DateTimeException("Errore nelle date della prenotazione, prenotazione fallita");
+
+        //Ritorna la lista di sci e snowboard disponibili del rifornitore
         AttrezzaturaDisponibileResponse attrezzaturaDisponibile =
-                rifornitoreService.getAttrezzaturaDisponibile(prenotazione.getRifornitore());
+                rifornitoreService.getAttrezzaturaDisponibile(rifornitore);
+
+        //Controlla se ci sono attrezzature non disponibili, con una data di fine prenotazione scaduta
+        Iterable prenotazioni = prenotazioneRepository.findAll();
+        updateAttrezzature(prenotazioni);
 
         if(attrezzaturaDisponibile.getSciList().isEmpty() && attrezzaturaDisponibile.getSnowboardList().isEmpty())
             throw new IllegalStateException("Attrezzature non disponibili");
 
-        List<Snowboard> prenotaSnowboards = new ArrayList<>();
-        List<Sci> prenotaSci = new ArrayList<>();
-
         //Controlla che gli sci e gli snowboards indicati siano tra quelli disponibili del rifornitore
+        BiPredicate<Attrezzature, List<? extends Attrezzature>> attrezzaturaComune = (attrezzatura, list)-> {
+            if(list.contains(attrezzatura))
+                return true;
+            else
+                throw new IllegalStateException("Uno o più elementi non sono presenti, prenotazione annullata");
+        };
+
         prenotazione.getSnowboardprenotati()
                 .stream()
-                .filter(cur -> {
-                    if(attrezzaturaDisponibile.getSnowboardList().contains(cur)) {  //Filtra solo gli snowboard che sono stati selezionati dall'utente
-                        prenotaSnowboards.add(cur);
-                        return true;
-                    }
-                    else
-                        throw new IllegalStateException("Uno o più elementi non sono presenti, prenotazione annullata");
-                })
-                .collect(Collectors.toList());
+                .filter(cur ->
+                        attrezzaturaComune.test(cur, attrezzaturaDisponibile.getSnowboardList()) //Richiama la funzione attrezzaturaComune e fa il controllo se è presente lo snowboard
+                );
 
+        //Come sopra solo che con gli sci
         prenotazione.getSciPrenotati()
                 .stream()
-                .filter(cur -> {
-                    if(attrezzaturaDisponibile.getSciList().contains(cur)) {  //Filtra solo gli sci che sono stati selezionati dall'utente
-                        prenotaSci.add(cur);
-                        return true;
-                    }
-                    else
-                        throw new IllegalStateException("Uno o più elementi non sono presenti, prenotazione annullata");
-                })
-                .collect(Collectors.toList());
+                .filter(cur -> attrezzaturaComune.test(cur, attrezzaturaDisponibile.getSciList()));
 
         //Vengono prenotati gli sci/snowboards
-        sciService.prenotaSci(prenotaSci);
-        snowboardService.prenotaSnowboards(prenotaSnowboards);
+        sciService.setEnableSci(prenotazione.getSciPrenotati(), false);
+        snowboardService.setEnableSnowboards(prenotazione.getSnowboardprenotati(), false);
 
         prenotazioneRepository.save(prenotazione);
 
@@ -79,10 +83,49 @@ public class PrenotazioneService {
                 .nomeRifornitore(prenotazione.getRifornitore().getNome())
                 .dataPrenotazione(prenotazione.getDataInizio().toString())
                 .dataDeposito(prenotazione.getDataFine().toString())
-                .listaSci(prenotaSci)
-                .listaSnowboards(prenotaSnowboards)
+                .listaSci(prenotazione.getSciPrenotati())
+                .listaSnowboards(prenotazione.getSnowboardprenotati())
                 .build();
     }
+
+    /**
+     * Il metodo prende tutte le prenotazioni e contralla per ognuna la sua data di fine,
+     * se è scaduta i flag delle attrezzature venogno messi tutti a true
+     * @param prenotazioni
+     */
+    private void updateAttrezzature(Iterable prenotazioni) {
+        Iterator<Prenotazione> iterator = prenotazioni.iterator();
+        while(iterator.hasNext()) {
+            Prenotazione pre = iterator.next();
+            //Se la prenotazione è scaduta gli sci/snowboards diventano disponibili
+            if(prenotazioneScaduta(pre)) {
+                sciService.setEnableSci(pre.getSciPrenotati(), true);
+                snowboardService.setEnableSnowboards(pre.getSnowboardprenotati(), true);
+            }
+        }
+    }
+
+    /**
+     * Controllo scadenza prenotazione
+     * @param prenotazione
+     * @return
+     */
+    private boolean prenotazioneScaduta(Prenotazione prenotazione) {
+        return prenotazione.getDataFine().isBefore(LocalDate.now());
+    }
+
+    /**
+     * Controlla se la data di inizio e prima di quella di fine e che la prenotazione avvenga prima di oggi
+     * @param inizio
+     * @param fine
+     * @return
+     */
+    private boolean errorDataPrenotazione(LocalDate inizio, LocalDate fine) {
+        return !inizio.isBefore(fine) || inizio.isBefore(LocalDate.now());
+    }
+
+
+
 
 
 }

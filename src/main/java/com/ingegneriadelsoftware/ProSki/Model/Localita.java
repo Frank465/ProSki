@@ -22,6 +22,11 @@ public class Localita {
     private List<Maestro> maestri;
     @OneToMany(mappedBy ="localita")
     private List<Skipass> skipasses;
+    @Column
     private Double prezzoAbbonamento;
+
+    public Localita(String nome) {
+        this.nome = nome;
+    }
 
 }

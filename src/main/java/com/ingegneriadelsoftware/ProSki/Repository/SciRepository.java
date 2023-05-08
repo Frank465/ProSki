@@ -11,7 +11,9 @@ import java.util.Set;
 
 @Repository
 public interface SciRepository extends CrudRepository<Sci, Integer> {
-    Set<Sci> findByRifornitoreId(Integer id);
+
+    @Query("select '*' from Sci where rifornitore = ?1")
+    Set<Sci> findByIdRifornitore(Integer id);
 
     @Transactional
     @Modifying

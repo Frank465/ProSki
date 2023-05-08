@@ -10,7 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class PrenotazioneRequest {
+public class AttrezzatureRifornitoreRequest {
 
     @NotNull
     @NotEmpty
@@ -31,13 +30,4 @@ public class PrenotazioneRequest {
     @NotNull
     private List<Snowboard> snowboards;
 
-    @NotNull
-    @NotEmpty
-    @DateTimeFormat(pattern="dd/MM/yyyy")
-    private String dataInizio;
-
-    @NotNull
-    @NotEmpty
-    @DateTimeFormat(pattern="dd/MM/yyyy")
-    private String dataFine;
 }

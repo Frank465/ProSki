@@ -9,13 +9,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Sci {
+public class Sci implements Attrezzature{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column
-    private Double misura;
+    private Integer misura;
     @Column
     private boolean enable = true;
     @ManyToOne

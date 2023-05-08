@@ -44,6 +44,9 @@ public class Utente implements UserDetails {
     private String token;
 
 
+    public Utente(String email){
+        this.email = email;
+    }
     public Utente(String nome, String cognome, String password, String email, Ruolo ruolo) {
         this.nome = nome;
         this.cognome = cognome;
@@ -56,10 +59,6 @@ public class Utente implements UserDetails {
         this.email = email;
         this.ruolo = ruolo;
         this.enable = enable;
-    }
-
-    public Utente(String email, String password) {
-
     }
 
     @Override

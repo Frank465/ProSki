@@ -1,6 +1,5 @@
 package com.ingegneriadelsoftware.ProSki.DTO.Request;
 
-import com.ingegneriadelsoftware.ProSki.Model.Localita;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,5 +25,5 @@ public class RifornitoreRequest {
 
     @NotNull
     @NotEmpty
-    private Localita localita;
+    private String localita;
 }

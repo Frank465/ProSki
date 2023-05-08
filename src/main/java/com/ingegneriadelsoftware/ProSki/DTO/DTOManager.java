@@ -4,10 +4,11 @@ import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.PrenotazioneRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
-import com.ingegneriadelsoftware.ProSki.Model.Localita;
-import com.ingegneriadelsoftware.ProSki.Model.Maestro;
-import com.ingegneriadelsoftware.ProSki.Model.Prenotazione;
-import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
+import com.ingegneriadelsoftware.ProSki.Model.*;
+import com.ingegneriadelsoftware.ProSki.Service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,8 +19,10 @@ import java.util.Date;
 /**
  * Il DTOManager recupera tutte le request provenienti dal client e crea delle classi java utilizzabili
  */
-
+@Component
+@RequiredArgsConstructor
 public class DTOManager {
+    private final JwtService jwtService;
 
     public static Localita getLocalitaByLocalitaRequest(LocalitaRequest request) {
         Localita localita = new Localita();
@@ -41,15 +44,27 @@ public class DTOManager {
         Rifornitore rifornitore = new Rifornitore();
         rifornitore.setNome(request.getNome());
         rifornitore.setEmail(request.getEmail());
-        rifornitore.setLocalita(request.getLocalita());
+        rifornitore.setLocalita(new Localita(request.getLocalita()));
         return rifornitore;
     }
 
-    public static Prenotazione getPrenotazioneByPrenotazioneRequest(PrenotazioneRequest request) {
+    /**
+     * Il metodo mappa una request su un oggetto di tipo prenotazione
+     * @param request
+     * @param servletRequest
+     * @return
+     */
+    public Prenotazione getPrenotazioneByPrenotazioneRequest(PrenotazioneRequest request, HttpServletRequest servletRequest) {
+        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
+        String authHeader = servletRequest.getHeader("Authorization");
+        String token = authHeader.substring(7); //il token si trova a quella posizione dall'inizio di Header
+        String email = jwtService.exctractUsername(token);
+        //Formattazione delle date in ingresso
         Prenotazione prenotazione = new Prenotazione();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        prenotazione.setUtente(request.getUtente());
-        prenotazione.setRifornitore(request.getRifornitore());
+        //Creazione della prenotazione
+        prenotazione.setUtente(new Utente(email));
+        prenotazione.setRifornitore(new Rifornitore(request.getEmailRifornitore()));
         prenotazione.setDataInizio(LocalDate.parse(request.getDataInizio(), formatter));
         prenotazione.setDataFine(LocalDate.parse(request.getDataFine(), formatter));
         prenotazione.setSnowboardprenotati(request.getSnowboards());
