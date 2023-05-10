@@ -14,6 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class AttrezzaturaDisponibileResponse {
-    List<Sci> sciList;
-    List<Snowboard> snowboardList;
+    List<Integer> sciList;
+    List<Integer> snowboardList;
 }

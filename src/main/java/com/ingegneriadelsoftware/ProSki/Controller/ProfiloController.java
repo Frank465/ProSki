@@ -20,7 +20,6 @@ public class ProfiloController {
 
     @PostMapping("/register")
     public ResponseEntity<RegistrazioneResponse> registrazione(@Valid @RequestBody RegistrazioneRequest request) {
-
         try {
             return ResponseEntity.ok(profiloService.registrazione(request));
         }catch(IllegalStateException e){

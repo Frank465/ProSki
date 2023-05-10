@@ -5,7 +5,6 @@ import com.ingegneriadelsoftware.ProSki.DTO.Request.AttrezzatureRifornitoreReque
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
-import com.ingegneriadelsoftware.ProSki.Model.Attrezzature;
 import com.ingegneriadelsoftware.ProSki.Model.Localita;
 import com.ingegneriadelsoftware.ProSki.Model.Maestro;
 import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
@@ -13,7 +12,6 @@ import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
 import com.ingegneriadelsoftware.ProSki.Service.LocalitaService;
 import com.ingegneriadelsoftware.ProSki.Service.MaestroService;
 import com.ingegneriadelsoftware.ProSki.Service.RifornitoreService;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

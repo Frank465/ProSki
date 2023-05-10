@@ -3,13 +3,14 @@ package com.ingegneriadelsoftware.ProSki.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Sci implements Attrezzature{
+public class Sci {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +20,14 @@ public class Sci implements Attrezzature{
     @Column
     private boolean enable = true;
     @ManyToOne
-    @JoinColumn(name = "id_rifornitore", nullable = false)
+    @JoinColumn(name = "id_rifornitore")
     private Rifornitore rifornitore;
-    @ManyToMany
-    private List<Prenotazione> prenotazione;
+    @ManyToMany(mappedBy = "sciPrenotati")
+    private List<Prenotazione> prenotazioneSci;
+
+    @Override
+    public String toString() {
+        return "Sci{id='" + id + "}";
+    }
 
 }

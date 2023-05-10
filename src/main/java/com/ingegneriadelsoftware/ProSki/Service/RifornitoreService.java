@@ -27,6 +27,8 @@ public class RifornitoreService {
     private final SciService sciService;
     private final LocalitaService localitaService;
     private final SnowboardService snowboardService;
+    private final SciRepository sciRepository;
+    private final SnowboardRepository snowboardRepository;
 
 
     /**
@@ -49,30 +51,47 @@ public class RifornitoreService {
 
     /**
      * Il metodo ritorna le attrezzature tra sci e snowboards di un rifornitore che sono attualmente disponibili
-     * @param rifornitore
+     * @param IdRifornitore
      * @return
      */
-    public AttrezzaturaDisponibileResponse getAttrezzaturaDisponibile(Rifornitore rifornitore) {
-        Set<Sci> sci =sciService.getSciByRifornitore(rifornitore.getRifornitoreId());
-        Set<Snowboard> snowboards = snowboardService.getSnowboradByRifornitore(rifornitore.getRifornitoreId());
+    public AttrezzaturaDisponibileResponse getAttrezzaturaDisponibile(Integer IdRifornitore) {
+        List<Sci> sci = sciRepository.findByRifornitoreId(IdRifornitore);
+        List<Snowboard> snowboards = snowboardRepository.findByRifornitoreId(IdRifornitore);
 
         List<Snowboard> snowboardsDisponibili = snowboards.stream()
-                .filter(cur -> !cur.isEnable())  // filtra solo gli snowboards che non sono stati prenotati
+                .filter(cur -> cur.isEnable())  // filtra solo gli snowboards che non sono stati prenotati
                 .toList(); //Inserisci gli elementi nella lista
 
         List<Sci> sciDisponibili = sci.stream()
-                .filter(cur -> !cur.isEnable())  // filtra solo gli sci che non sono stati prenotati
+                .filter(cur -> cur.isEnable())  // filtra solo gli sci che non sono stati prenotati
                 .toList(); //Inserisci gli elementi nella lista
 
         return AttrezzaturaDisponibileResponse
                 .builder()
-                .snowboardList(snowboardsDisponibili)
-                .sciList(sciDisponibili)
+                .snowboardList(snowboardsDisponibili.stream().map(cur->cur.getId()).toList())
+                .sciList(sciDisponibili.stream().map(cur->cur.getId()).toList())
                 .build();
     }
 
+    /**
+     * Cerca rifornitore tramite email
+     * @param email
+     * @return
+     * @throws IllegalStateException
+     */
     public Rifornitore getRifornitoreByEmail(String email) throws IllegalStateException {
         return rifornitoreRepository.findByEmail(email).
+                orElseThrow(()-> new IllegalStateException("Il rifornitore non è stato trovato"));
+    }
+
+    /**
+     * Cerca fornitore tramite ID
+     * @param idRifornitore
+     * @return
+     * @throws IllegalStateException
+     */
+    public Rifornitore getRifornitoreById(Integer idRifornitore) throws IllegalStateException {
+        return rifornitoreRepository.findById(idRifornitore).
                 orElseThrow(()-> new IllegalStateException("Il rifornitore non è stato trovato"));
     }
 

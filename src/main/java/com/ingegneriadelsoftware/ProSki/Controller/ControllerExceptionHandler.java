@@ -30,7 +30,7 @@ public class ControllerExceptionHandler {
         BindingResult bindingResult = ex.getBindingResult();
         List<String> errors = new ArrayList<>();
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            String errorMessage = fieldError.getDefaultMessage();
+            String errorMessage = fieldError.getField() + " " + fieldError.getDefaultMessage();
             errors.add(errorMessage);
         }
         return ResponseEntity.badRequest().body(errors);

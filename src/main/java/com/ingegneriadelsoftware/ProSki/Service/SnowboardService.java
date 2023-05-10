@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,12 +18,10 @@ public class SnowboardService {
      * Il metodo data una lista di snowboards ed un valore, aggiorna per ogni snowboard il corrispondente valore di enable
      * @param prenotaSnowboards value
      */
-    public void setEnableSnowboards(List<Snowboard> prenotaSnowboards, boolean value) {
-        prenotaSnowboards.forEach(snowboard -> snowboardRepository.setEnableById(snowboard.getId(), value));
-    }
-
-    public Set<Snowboard> getSnowboradByRifornitore(Integer idRifornitore){
-        return snowboardRepository.findByIdRifornitore(idRifornitore);
+    public void setEnableSnowboards(List<Snowboard> prenotaSnowboards, boolean enable) {
+        prenotaSnowboards.forEach(snowboard -> {
+            snowboardRepository.setEnable(snowboard.getId(), enable);
+        });
     }
 
     /**

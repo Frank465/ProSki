@@ -91,7 +91,7 @@ public class ProfiloService {
 
         String jwtToken = jwtService.generateToken(
                 user,
-                new Date(System.currentTimeMillis() + 1000 * 60 * 24)
+                new Date(System.currentTimeMillis() + 1000 * 3600 * 24)
         );
 
         return AuthenticationResponse.builder()

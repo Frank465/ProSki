@@ -25,7 +25,7 @@ public class Rifornitore {
     private String email;
 
     @ManyToOne
-    @JoinColumn(name = "id_localita", nullable = false)
+    @JoinColumn(name = "id_localita")
     private Localita localita;
 
     @OneToMany(mappedBy = "rifornitore")

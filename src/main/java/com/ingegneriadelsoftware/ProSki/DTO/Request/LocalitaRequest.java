@@ -20,7 +20,6 @@ public class LocalitaRequest {
     private String nome;
 
     @NotNull
-    @Pattern(regexp = Utils.IS_DOUBLE)
     private Double prezzoAbbonamento;
 
 }

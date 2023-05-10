@@ -19,6 +19,6 @@ public class PrenotazioneResponse {
     private String nomeRifornitore;
     private String dataPrenotazione;
     private String dataDeposito;
-    private List<Sci> listaSci;
-    private List<Snowboard> listaSnowboards;
+    private String listaSci;
+    private String listaSnowboards;
 }

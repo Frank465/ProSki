@@ -26,20 +26,27 @@ public class Utente implements UserDetails {
             generator = "utente_sequence"
     )
     private Integer utenteId;
+
     @Column
     private String nome;
+
     @Column
     private String cognome;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     @OneToMany(mappedBy = "utente")
     private List<Prenotazione> prenotazioni;
+
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
     private boolean locked = false;
     private boolean enable = false;
+
     @Column
     private String token;
 

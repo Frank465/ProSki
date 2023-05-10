@@ -14,6 +14,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
+/**
+ *La classe di utilità viene utilizzata per la request poi nel DTOManager verrà mappata come una vera Prenotazione
+ */
 @Getter
 @RequiredArgsConstructor
 @EqualsAndHashCode
@@ -26,10 +29,10 @@ public class PrenotazioneRequest {
     private String emailRifornitore;
 
     @NotNull
-    private List<Sci> sci;
+    private List<Sci> sciList;
 
     @NotNull
-    private List<Snowboard> snowboards;
+    private List<Snowboard> snowboardsList;
 
     @NotNull
     @NotEmpty

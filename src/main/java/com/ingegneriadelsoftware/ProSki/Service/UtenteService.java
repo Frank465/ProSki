@@ -79,6 +79,12 @@ public class UtenteService implements UserDetailsService {
         utenteRepository.deleteByEmail(email);
     }
 
+    /**
+     * Il metodo viene utilizzato per la registrazione quindi prende in considerazione il token nella classe Utente del DB
+     * e non dal contesto di Spring Security
+     * @param token
+     * @return
+     */
     public Utente findUtenteByToken(String token) {
         Optional<Utente> utente = utenteRepository.findByToken(token);
         if(utente.isPresent())

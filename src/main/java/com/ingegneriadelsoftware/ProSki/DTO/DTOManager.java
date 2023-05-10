@@ -4,6 +4,7 @@ import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.PrenotazioneRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.PrenotazioneResponse;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,18 +58,30 @@ public class DTOManager {
     public Prenotazione getPrenotazioneByPrenotazioneRequest(PrenotazioneRequest request, HttpServletRequest servletRequest) {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
         String authHeader = servletRequest.getHeader("Authorization");
-        String token = authHeader.substring(7); //il token si trova a quella posizione dall'inizio di Header
-        String email = jwtService.exctractUsername(token);
+        String jwt = authHeader.substring(7); //Il token si trova nella posizione dopo la 7
+        String userEmail = jwtService.exctractUsername(jwt);
         //Formattazione delle date in ingresso
         Prenotazione prenotazione = new Prenotazione();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         //Creazione della prenotazione
-        prenotazione.setUtente(new Utente(email));
+        prenotazione.setUtente(new Utente(userEmail));
         prenotazione.setRifornitore(new Rifornitore(request.getEmailRifornitore()));
         prenotazione.setDataInizio(LocalDate.parse(request.getDataInizio(), formatter));
         prenotazione.setDataFine(LocalDate.parse(request.getDataFine(), formatter));
-        prenotazione.setSnowboardprenotati(request.getSnowboards());
-        prenotazione.setSciPrenotati(request.getSci());
+        prenotazione.setSnowboardPrenotati(request.getSnowboardsList());
+        prenotazione.setSciPrenotati(request.getSciList());
         return prenotazione;
+    }
+
+    public static PrenotazioneResponse toPrenotazioneResponseByPrenotazione(Prenotazione prenotazione) {
+        return PrenotazioneResponse
+                .builder()
+                .nomeUtente(prenotazione.getUtente().getNome())
+                .nomeRifornitore(prenotazione.getRifornitore().getNome())
+                .dataPrenotazione(prenotazione.getDataInizio().toString())
+                .dataDeposito(prenotazione.getDataFine().toString())
+                .listaSnowboards(prenotazione.getSnowboardPrenotati().toString())
+                .listaSci(prenotazione.getSciPrenotati().toString())
+                .build();
     }
 }

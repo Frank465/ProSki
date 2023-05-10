@@ -1,5 +1,6 @@
 package com.ingegneriadelsoftware.ProSki.Repository;
 
+import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
 import com.ingegneriadelsoftware.ProSki.Model.Sci;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,17 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Set;
+import java.util.List;
 
 @Repository
 public interface SciRepository extends CrudRepository<Sci, Integer> {
 
-    @Query("select '*' from Sci where rifornitore = ?1")
-    Set<Sci> findByIdRifornitore(Integer id);
+    List<Sci> findByRifornitore(Rifornitore rifornitore);
 
     @Transactional
     @Modifying
-    @Query("UPDATE Sci s SET s.enable =?2 WHERE s.id=?1")
-    void setEnableById(Integer id, boolean value );
+    @Query("UPDATE Sci s  SET s.enable =?1  WHERE s.id = ?2")
+    void setEnable(boolean enable, Integer idSci);
 
+    @Query("select Sci from Sci s where s.rifornitore=?1")
+    List<Sci> findByRifornitoreId(Integer idRifornitore);
 }
