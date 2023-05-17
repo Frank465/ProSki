@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -96,5 +97,17 @@ public class JwtService {
      */
     public boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
+    }
+
+    /**
+     * Estrae l'email dell'utente dal SecurityContext
+     * @param servletRequest
+     * @return
+     */
+    public String findEmailUtenteBySecurityContext(HttpServletRequest servletRequest) {
+        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
+        String authHeader = servletRequest.getHeader("Authorization");
+        String jwt = authHeader.substring(7); //Il token si trova nella posizione dopo la 7
+        return exctractUsername(jwt);
     }
 }

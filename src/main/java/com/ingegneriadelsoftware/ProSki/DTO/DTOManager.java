@@ -1,9 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.DTO;
 
-import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.PrenotazioneRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.LezioneResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.PrenotazioneResponse;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Service.JwtService;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -23,7 +22,6 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class DTOManager {
-    private final JwtService jwtService;
 
     public static Localita getLocalitaByLocalitaRequest(LocalitaRequest request) {
         Localita localita = new Localita();
@@ -49,30 +47,6 @@ public class DTOManager {
         return rifornitore;
     }
 
-    /**
-     * Il metodo mappa una request su un oggetto di tipo prenotazione
-     * @param request
-     * @param servletRequest
-     * @return
-     */
-    public Prenotazione getPrenotazioneByPrenotazioneRequest(PrenotazioneRequest request, HttpServletRequest servletRequest) {
-        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
-        String authHeader = servletRequest.getHeader("Authorization");
-        String jwt = authHeader.substring(7); //Il token si trova nella posizione dopo la 7
-        String userEmail = jwtService.exctractUsername(jwt);
-        //Formattazione delle date in ingresso
-        Prenotazione prenotazione = new Prenotazione();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        //Creazione della prenotazione
-        prenotazione.setUtente(new Utente(userEmail));
-        prenotazione.setRifornitore(new Rifornitore(request.getEmailRifornitore()));
-        prenotazione.setDataInizio(LocalDate.parse(request.getDataInizio(), formatter));
-        prenotazione.setDataFine(LocalDate.parse(request.getDataFine(), formatter));
-        prenotazione.setSnowboardPrenotati(request.getSnowboardsList());
-        prenotazione.setSciPrenotati(request.getSciList());
-        return prenotazione;
-    }
-
     public static PrenotazioneResponse toPrenotazioneResponseByPrenotazione(Prenotazione prenotazione) {
         return PrenotazioneResponse
                 .builder()
@@ -84,4 +58,15 @@ public class DTOManager {
                 .listaSci(prenotazione.getSciPrenotati().toString())
                 .build();
     }
+
+    public static LezioneResponse toLezioneResponseByLezione(Lezione lezione) {
+        return LezioneResponse
+                .builder()
+                .idLezione(lezione.getId())
+                .maestro(lezione.getMaestro().getNome())
+                .inizioLezione(lezione.getInizioLezione().toString())
+                .fineLezione(lezione.getFineLezione().toString())
+                .build();
+    }
+
 }

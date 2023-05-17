@@ -54,9 +54,10 @@ public class RifornitoreService {
      * @param IdRifornitore
      * @return
      */
-    public AttrezzaturaDisponibileResponse getAttrezzaturaDisponibile(Integer IdRifornitore) {
-        List<Sci> sci = sciRepository.findByRifornitoreId(IdRifornitore);
-        List<Snowboard> snowboards = snowboardRepository.findByRifornitoreId(IdRifornitore);
+    public AttrezzaturaDisponibileResponse getAttrezzaturaDisponibile(Integer idRifornitore) {
+        Rifornitore rifornitore = getRifornitoreById(idRifornitore);
+        List<Sci> sci = sciRepository.findByRifornitore(rifornitore);
+        List<Snowboard> snowboards = snowboardRepository.findByRifornitore(rifornitore);
 
         List<Snowboard> snowboardsDisponibili = snowboards.stream()
                 .filter(cur -> cur.isEnable())  // filtra solo gli snowboards che non sono stati prenotati

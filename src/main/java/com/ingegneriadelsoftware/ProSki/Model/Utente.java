@@ -42,6 +42,12 @@ public class Utente implements UserDetails {
     @OneToMany(mappedBy = "utente")
     private List<Prenotazione> prenotazioni;
 
+    @ManyToMany
+    @JoinTable(name = "utenti_lezione", joinColumns =
+    @JoinColumn(name = "utente"), inverseJoinColumns =
+    @JoinColumn(name = "lezione"))
+    private List<Lezione> lezioniUtente;
+
     @Enumerated(EnumType.STRING)
     private Ruolo ruolo;
     private boolean locked = false;

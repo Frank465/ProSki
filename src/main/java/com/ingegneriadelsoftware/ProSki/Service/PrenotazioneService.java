@@ -1,10 +1,14 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
+import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.PrenotazioneRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.AttrezzaturaDisponibileResponse;
 import com.ingegneriadelsoftware.ProSki.Model.Prenotazione;
 import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
 import com.ingegneriadelsoftware.ProSki.Repository.PrenotazioneRepository;
+import com.ingegneriadelsoftware.ProSki.Utils.Utils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,7 @@ public class PrenotazioneService {
     private final SnowboardService snowboardService;
     private final PrenotazioneRepository prenotazioneRepository;
     private final UtenteService utenteService;
+    private final JwtService jwtService;
 
 
     /**
@@ -35,15 +40,22 @@ public class PrenotazioneService {
      * @return PrenotazioneResponse
      */
     @Transactional
-    public Prenotazione creaPrenotazione(Prenotazione prenotazione) throws IllegalStateException {
+    public Prenotazione creaPrenotazione(PrenotazioneRequest prenotazione, HttpServletRequest servletRequest) throws IllegalStateException {
+        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
+        String userEmail = jwtService.findEmailUtenteBySecurityContext(servletRequest);
+
+        //Conversione Date da stringa a LocalDate
+        LocalDate inizioPrenotazione = Utils.formatterData(prenotazione.getDataInizio()).toLocalDate();
+        LocalDate finePrenotazione = Utils.formatterData(prenotazione.getDataFine()).toLocalDate();
+
         //Controllo rifornitore
-        Rifornitore rifornitore = rifornitoreService.getRifornitoreByEmail(prenotazione.getRifornitore().getEmail());
-        prenotazione.setRifornitore(rifornitore);
+        Rifornitore rifornitore = rifornitoreService.getRifornitoreByEmail(prenotazione.getEmailRifornitore());
+
         //Controllo Utente
-        Utente utente = (Utente) utenteService.loadUserByUsername(prenotazione.getUtente().getEmail());
-        prenotazione.setUtente(utente);
+        Utente utente = (Utente) utenteService.loadUserByUsername(userEmail);
+
         //Controllo date
-        if(errorDataPrenotazione(prenotazione.getDataInizio(), prenotazione.getDataFine()))
+        if(errorDataPrenotazione(inizioPrenotazione, finePrenotazione))
             throw new DateTimeException("Errore nelle date della prenotazione, prenotazione fallita");
 
         //Ritorna la lista di sci e snowboard disponibili del rifornitore
@@ -51,7 +63,7 @@ public class PrenotazioneService {
                 rifornitoreService.getAttrezzaturaDisponibile(rifornitore.getRifornitoreId());
 
         //Controlla se ci sono attrezzature non disponibili, con una data di fine prenotazione scaduta
-        Iterable prenotazioni = prenotazioneRepository.findAll();
+        Iterable<Prenotazione> prenotazioni = prenotazioneRepository.findAll();
         updateAttrezzature(prenotazioni);
 
         if(attrezzaturaDisponibile.getSciList().isEmpty() && attrezzaturaDisponibile.getSnowboardList().isEmpty())
@@ -67,25 +79,34 @@ public class PrenotazioneService {
         };
 
         //Richiama la funzione attrezzaturaComune e fa il controllo se è presente lo snowboard
-        prenotazione.getSnowboardPrenotati()
+        prenotazione.getSnowboardsList()
                 .stream()
                 .filter(cur ->
                         attrezzaturaComune.test(cur.getId(), attrezzaturaDisponibile.getSnowboardList()))
                 .toList();
 
         //Come sopra solo che con gli sci
-        prenotazione.getSciPrenotati()
+        prenotazione.getSciList()
                 .stream()
                 .filter(cur -> attrezzaturaComune.test(cur.getId(), attrezzaturaDisponibile.getSciList()))
                 .toList();
 
         //Vengono prenotati gli sci/snowboards
-        sciService.setEnableSci(prenotazione.getSciPrenotati(), false);
-        snowboardService.setEnableSnowboards(prenotazione.getSnowboardPrenotati(), false);
+        sciService.setEnableSci(prenotazione.getSciList(), false);
+        snowboardService.setEnableSnowboards(prenotazione.getSnowboardsList(), false);
 
-        prenotazioneRepository.save(prenotazione);
+        Prenotazione newPrenotazione = new Prenotazione(
+                utente,
+                rifornitore,
+                prenotazione.getSciList(),
+                prenotazione.getSnowboardsList(),
+                inizioPrenotazione,
+                finePrenotazione
+        );
 
-        return prenotazione;
+        prenotazioneRepository.save(newPrenotazione);
+
+        return newPrenotazione;
     }
 
     /**
@@ -93,8 +114,8 @@ public class PrenotazioneService {
      * se è scaduta i flag delle attrezzature venogno messi tutti a true
      * @param prenotazioni
      */
-    private void updateAttrezzature(Iterable prenotazioni) {
-        for (Prenotazione pre : (Iterable<Prenotazione>) prenotazioni) {
+    private void updateAttrezzature(Iterable<Prenotazione> prenotazioni) {
+        for (Prenotazione pre : prenotazioni) {
             //Se la prenotazione è scaduta gli sci/snowboards diventano disponibili
             if (prenotazioneScaduta(pre)) {
                 sciService.setEnableSci(pre.getSciPrenotati(), true);

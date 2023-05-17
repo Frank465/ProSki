@@ -11,14 +11,11 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class LocalitaRequest {
-
+public class IscrizioneLezioneRequest {
     @NotNull
     @NotEmpty
-    private String nome;
-
-    @NotNull
-    private Double prezzoAbbonamento;
+    private Integer id;
 
 }
+
 

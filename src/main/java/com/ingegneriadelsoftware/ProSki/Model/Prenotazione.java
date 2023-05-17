@@ -45,4 +45,13 @@ public class Prenotazione {
 
     @Column
     private LocalDate dataFine;
+
+    public Prenotazione(Utente utente, Rifornitore rifornitore, List<Sci> sciPrenotati, List<Snowboard> snowboardPrenotati, LocalDate dataInizio, LocalDate dataFine) {
+        this.utente = utente;
+        this.rifornitore = rifornitore;
+        this.sciPrenotati = sciPrenotati;
+        this.snowboardPrenotati = snowboardPrenotati;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+    }
 }

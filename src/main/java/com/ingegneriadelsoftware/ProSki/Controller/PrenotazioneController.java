@@ -23,13 +23,11 @@ public class PrenotazioneController {
 
     private final RifornitoreService rifornitoreService;
     private final PrenotazioneService prenotazioneService;
-    private final DTOManager dtoManager;
 
     @PostMapping("/create")
     public ResponseEntity<?> createPrenotazione(@Valid @RequestBody PrenotazioneRequest request, HttpServletRequest servletRequest) {
-        Prenotazione prenotazione = dtoManager.getPrenotazioneByPrenotazioneRequest(request, servletRequest);
         try{
-            PrenotazioneResponse prenotazioneResponse = dtoManager.toPrenotazioneResponseByPrenotazione(prenotazioneService.creaPrenotazione(prenotazione));
+            PrenotazioneResponse prenotazioneResponse = DTOManager.toPrenotazioneResponseByPrenotazione(prenotazioneService.creaPrenotazione(request, servletRequest));
             return ResponseEntity.ok(prenotazioneResponse);
         }catch(IllegalStateException | DateTimeException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -37,9 +35,9 @@ public class PrenotazioneController {
     }
 
     @GetMapping("/getAttrezzature/{id}")
-    public ResponseEntity<?> getAttrezzatureDisponibiliByRifornitore(@PathVariable Integer idRifornitore) {
+    public ResponseEntity<?> getAttrezzatureDisponibiliByRifornitore(@PathVariable Integer id) {
         try{
-            return ResponseEntity.ok(rifornitoreService.getAttrezzaturaDisponibile(idRifornitore));
+            return ResponseEntity.ok(rifornitoreService.getAttrezzaturaDisponibile(id));
         }catch (IllegalStateException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }

@@ -15,6 +15,10 @@ public class MaestroService {
     private final MaestroRepository maestroRepository;
     private final LocalitaService localitaService;
 
+    public Maestro getMaestroByEmail(String email) throws EntityNotFoundException {
+        return maestroRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Il maestro non esiste"));
+    }
 
     public String inserisciMaestro(Maestro maestro, String localita) throws EntityNotFoundException {
         Optional<Maestro> emailMaestro = maestroRepository.findByEmail(maestro.getEmail());

@@ -1,14 +1,14 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.AttrezzatureRifornitoreRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.LocalitaRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.MaestroRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.RifornitoreRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
+import com.ingegneriadelsoftware.ProSki.Model.Lezione;
 import com.ingegneriadelsoftware.ProSki.Model.Localita;
 import com.ingegneriadelsoftware.ProSki.Model.Maestro;
 import com.ingegneriadelsoftware.ProSki.Model.Rifornitore;
 import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
+import com.ingegneriadelsoftware.ProSki.Service.LezioneService;
 import com.ingegneriadelsoftware.ProSki.Service.LocalitaService;
 import com.ingegneriadelsoftware.ProSki.Service.MaestroService;
 import com.ingegneriadelsoftware.ProSki.Service.RifornitoreService;
@@ -28,6 +28,7 @@ public class AdminController {
     private final UtenteRepository utenteRepository;
     private final LocalitaService localitaService;
     private final RifornitoreService rifornitoreService;
+    private final LezioneService lezioneService;
 
     @GetMapping
     public String getMessage(){
@@ -76,5 +77,14 @@ public class AdminController {
     @DeleteMapping("/delete/utente")
     public void deleteUtente(@RequestBody String email) {
         utenteRepository.deleteByEmail(email);
+    }
+
+    @PostMapping("/create/lezione")
+    public ResponseEntity<?> createLezione(@Valid @RequestBody LezioneRequest request) {
+        try{
+            return ResponseEntity.ok(DTOManager.toLezioneResponseByLezione(lezioneService.createLezione(request)));
+        } catch (IllegalStateException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

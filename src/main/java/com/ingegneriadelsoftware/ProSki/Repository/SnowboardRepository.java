@@ -20,6 +20,4 @@ public interface SnowboardRepository extends CrudRepository<Snowboard, Integer> 
     @Query("UPDATE Snowboard s SET s.enable =?2 WHERE s.id=?1")
     void setEnable(Integer id, boolean enable);
 
-    @Query("select Snowboard from Snowboard s where s.rifornitore=?1")
-    List<Snowboard> findByRifornitoreId(Integer idRifornitore);
 }

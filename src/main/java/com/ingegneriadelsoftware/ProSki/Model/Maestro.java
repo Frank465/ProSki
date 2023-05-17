@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Getter
 @Setter
@@ -34,4 +36,10 @@ public class Maestro {
     @JoinColumn(name = "id_localita")
     private Localita localita;
 
+    @OneToMany(mappedBy = "maestro")
+    private List<Lezione> lezioneList;
+
+    public Maestro(String email) {
+        this.email = email;
+    }
 }

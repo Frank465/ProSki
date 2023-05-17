@@ -1,18 +1,23 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
-import com.ingegneriadelsoftware.ProSki.Email.BuildEmail;
-import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.IscrizioneLezioneRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.LezioneRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.LezioneResponse;
+import com.ingegneriadelsoftware.ProSki.Email.*;
+import com.ingegneriadelsoftware.ProSki.Model.Lezione;
 import com.ingegneriadelsoftware.ProSki.Model.Utente;
+import com.ingegneriadelsoftware.ProSki.Repository.LezioneRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -22,9 +27,8 @@ public class UtenteService implements UserDetailsService {
     private final UtenteRepository utenteRepository;
     private final JwtService jwtService;
     private final EmailSender emailSend;
-    private final BuildEmail buildEmail;
-
-
+    private final LezioneRepository lezioneRepository;
+    private final LezioneService lezioneService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws IllegalStateException {
@@ -65,7 +69,8 @@ public class UtenteService implements UserDetailsService {
         utente.setToken(jwtToken);
 
         String link = "http://localhost:8080/api/v1/profilo/confirm?token=" + jwtToken;
-        emailSend.send(utente.getEmail(), buildEmail.create(utente.getNome(), link));
+        CreatorEmail email = new RegistrazioneCreatorEmail(utente.getNome(), link);
+        emailSend.send(utente.getEmail(), email.render());
 
         utenteRepository.save(utente);
         return jwtToken;
@@ -92,4 +97,38 @@ public class UtenteService implements UserDetailsService {
         return null;
     }
 
+
+    /**
+     * trova tutte le lezioni di un utente
+     * @param servletRequest
+     * @return
+     */
+    public List<Lezione> getLezioniByUtente(HttpServletRequest servletRequest) throws EntityNotFoundException {
+        //Prende l'email dell'utente dal SecurityContext e ricava l'utente dal DB
+        String emailUtente = jwtService.findEmailUtenteBySecurityContext(servletRequest);
+        Utente utente = (Utente) loadUserByUsername(emailUtente);
+
+        return utente.getLezioniUtente();
+    }
+
+    public String iscrizioneLezioni(List<IscrizioneLezioneRequest> request, HttpServletRequest requestServlet) throws EntityNotFoundException {
+        //Ricavo l'utente dal suo token
+        String userEmail = jwtService.findEmailUtenteBySecurityContext(requestServlet);
+        Utente utente = (Utente) loadUserByUsername(userEmail);
+        List<Lezione> list = new ArrayList<>();
+
+        request.forEach(cur-> {
+            list.add(getLezioneById(cur.getId()));
+        });
+
+        utente.setLezioniUtente(list);
+
+        utenteRepository.save(utente);
+        return "Iscrizione avvenuta con successo";
+    }
+
+    public Lezione getLezioneById(Integer id) throws EntityNotFoundException {
+        return lezioneRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("La lezione cercata non esiste"));
+    }
 }

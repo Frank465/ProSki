@@ -20,6 +20,4 @@ public interface SciRepository extends CrudRepository<Sci, Integer> {
     @Query("UPDATE Sci s  SET s.enable =?1  WHERE s.id = ?2")
     void setEnable(boolean enable, Integer idSci);
 
-    @Query("select Sci from Sci s where s.rifornitore=?1")
-    List<Sci> findByRifornitoreId(Integer idRifornitore);
 }
