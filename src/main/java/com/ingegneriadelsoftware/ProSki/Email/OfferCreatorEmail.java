@@ -8,6 +8,6 @@ public class OfferCreatorEmail extends CreatorEmail {
     private final String date;
 
     public BuildEmail createEmail() {
-        return new BuildRegisterEmail(name, date);
+        return new BuildOfferEmail(name, date);
     }
 }

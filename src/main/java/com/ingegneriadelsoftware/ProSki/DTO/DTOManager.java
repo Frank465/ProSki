@@ -44,7 +44,7 @@ public class DTOManager {
                 .builder()
                 .offer(offer.getName())
                 .date(offer.getDate().toString())
-                .plan(offer.getPlan().toString())
+                .plan(offer.getPlan().getName())
                 .build();
     }
 

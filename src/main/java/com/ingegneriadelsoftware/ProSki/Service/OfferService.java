@@ -26,8 +26,13 @@ import java.util.Optional;
 public class OfferService {
 
     private final OfferRepository offerRepository;
-    private final PlanRepository pianoRepository;
+    private final PlanService planService;
     private final EmailSender emailSender;
+
+    public Offer getofferByName(String offer) {
+        return offerRepository.findByName(offer).orElseThrow(()-> new IllegalStateException("L'"));
+    }
+
 
     /**
      * Il metodo elimina le offerte scadute, fa il controllo dei dati inseriti se sono validi e crea delle offerte associate ad un
@@ -44,15 +49,20 @@ public class OfferService {
                 offerRepository.delete(offer);
         }
         //Controllo esistenza del piano per inserimento offerta
-        Optional<Plan> piano = pianoRepository.findByName(request.getPlan());
-        if(piano.isEmpty()) throw new IllegalStateException("L'offerta non può essere associata ad un piano inesistente");
+        Plan plan = planService.getPlanByName(request.getPlan());
         //Controllo data
         LocalDate data = Utils.formatterData(request.getDate());
         if(data.isBefore(LocalDate.now())) throw new IllegalStateException("La data inserita non è valida");
+        //Controllo esistenza offerta per il piano
+        List<Offer> offerPlan = plan.getOffer();
+        offerPlan.forEach(cur -> {
+            if(request.getName().equalsIgnoreCase(cur.getName()))
+                throw new IllegalStateException("L'offerta " + request.getName() + " è già presente per il piano " + cur.getName());
+        });
         //Creazione offerta
-        Offer newOffer = new Offer(request.getName(), data, request.getDiscount(), piano.get());
+        Offer newOffer = new Offer(request.getName(), data, request.getDiscount(), plan);
         //Invio email della notifica offerta a tutti gli utenti iscritti al piano
-        List<User> utentiPiano = piano.get().getUsers();
+        List<User> utentiPiano = plan.getUsers();
         utentiPiano.forEach( cur -> {
             CreatorEmail email = new OfferCreatorEmail(cur.getUsername(), request.getDate());
             emailSender.send(cur.getEmail(), email.render());

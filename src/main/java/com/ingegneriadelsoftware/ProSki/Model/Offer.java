@@ -16,7 +16,7 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idOffer;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false)

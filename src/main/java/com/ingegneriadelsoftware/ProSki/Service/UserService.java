@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -130,7 +131,7 @@ public class UserService implements UserDetailsService {
     /**
      * Dato un utente e il codice della tessera, il metodo controlla se è presente un'offerta per la data selezionata e
      * applica lo sconto al prezzo dell'abbonamento, infine avviene l'acquisto. Si può acquistare uno skipass solo se con la stessa
-     * tessera non sono stati effettuati acquisti futuri
+     * tessera non sono stati effettuati acquisti futuri e un utente può acquistare uno skipass al giorno
      * @param request
      * @param httpRequest
      * @return
@@ -152,11 +153,16 @@ public class UserService implements UserDetailsService {
             if(!elem.getDate().isBefore(LocalDate.now()))
                 throw new IllegalStateException("La tessera ha un abbonamento già caricato per il giorno " + elem.getDate());
         });
+        //Controllo che l'utente abbia acquistato un solo skipass per una giornata
+        user.getBuySkipasses().forEach(cur->{
+            if(cur.getDate().isEqual(date))
+                throw new IllegalStateException("L'utente ha già acquistato uno skipass per il giorno " + cur.getDate());
+        });
+
         //Controllo esistenza piano per utente e offerta
         if(user.getPlan() != null)
             discount = offerService.getSconto(user.getPlan().getOffer(), date);
         Double priceSubscription = cardSkipass.getLocation().getPriceSubscription();
-
         Double actualPrice = priceSubscription - priceSubscription * discount / 100;
         //Acquisto skipass
         BuySkipass buySkipass = new BuySkipass(user, cardSkipass, actualPrice, date);
@@ -176,9 +182,11 @@ public class UserService implements UserDetailsService {
         //Conversione Data da Integer a LocalDate, considerando che gli utenti più grandi hanno una data di nascita meno recente
         LocalDate endDateBirth = LocalDate.now().minusYears(startAge);
         LocalDate startDateBirth = LocalDate.now().minusYears(endAge);
-        List<User> utenti = userRepository.findAllByDateBirthBetween(startDateBirth, endDateBirth);
-        if(utenti.isEmpty()) throw new IllegalStateException("Non è stato trovato nessun utente con queste eta");
-        return utenti;
+        List<User> users = userRepository.findAllByDateBirthBetween(startDateBirth, endDateBirth);
+        //Filtra per soli utenti registrati
+        List<User> usersRegister = users.stream().filter(User::isEnable).toList();
+        if(usersRegister.isEmpty()) throw new IllegalStateException("Non è stato trovato nessun utente con queste eta");
+        return usersRegister;
     }
 
     public List<User> getAllUsersByGender(String gender) {
