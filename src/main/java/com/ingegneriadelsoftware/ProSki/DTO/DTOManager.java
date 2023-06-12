@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DTOManager {
 
-    public static ReservationResponse toPrenotazioneResponseByPrenotazione(Reservation reservation) {
+    public static ReservationResponse toReservationResponseByReservation(Reservation reservation) {
         return ReservationResponse
                 .builder()
                 .userName(reservation.getUser().getName())
@@ -25,7 +25,7 @@ public class DTOManager {
                 .reservationDate(reservation.getStartDate().toString())
                 .filingDate(reservation.getEndDate().toString())
                 .snowboardsList(reservation.getSnowboardReserved().toString())
-                .skyList(reservation.getSkyReserved().toString())
+                .skyList(reservation.getSkiReserved().toString())
                 .build();
     }
 
@@ -80,5 +80,4 @@ public class DTOManager {
                 .date(buySkipass.getDate().toString())
                 .build();
     }
-
 }

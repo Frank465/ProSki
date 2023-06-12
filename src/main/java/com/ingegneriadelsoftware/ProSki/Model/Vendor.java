@@ -32,7 +32,7 @@ public class Vendor {
     private List<Reservation> reservations;
 
     @OneToMany(mappedBy = "vendor")
-    private List<Sky> skyAvailable;
+    private List<Ski> skiAvailable;
 
     @OneToMany(mappedBy = "vendor")
     private List<Snowboard> snowboardAvailable;

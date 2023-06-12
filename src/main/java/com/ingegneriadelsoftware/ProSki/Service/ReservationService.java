@@ -2,9 +2,11 @@ package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.ReservationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Repository.ReservationRepository;
-import com.ingegneriadelsoftware.ProSki.Repository.SkyRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.SkiRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.SnowboardRepository;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 
 /**
@@ -28,7 +31,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserService userService;
     private final JwtService jwtService;
-    private final SkyRepository skyRepository;
+    private final SkiRepository skiRepository;
     private final SnowboardRepository snowboardRepository;
 
     /**
@@ -56,14 +59,14 @@ public class ReservationService {
         if(errorDateReservation(startDateReservation, endDateReservation))
             throw new DateTimeException("Errore nelle date della prenotazione, prenotazione fallita");
 
-        //Ritorna la lista di sci e snowboard disponibili del rifornitore
+        //Ritorna la lista di sci e snowboard (entrambi sono DTO, hanno solo id e misura) disponibili del rifornitore
         EquipmentAvailableResponse equipmentAvailable = vendorService.getEquipmentAvailable(vendor.getVendorId());
 
         //Controlla se ci sono attrezzature non disponibili, con una data di fine prenotazione scaduta
         Iterable<Reservation> prenotazioni = reservationRepository.findAll();
         updateAttrezzature(prenotazioni);
 
-        if(equipmentAvailable.getSkyList().isEmpty() && equipmentAvailable.getSnowboardList().isEmpty())
+        if(equipmentAvailable.getSkisList().isEmpty() && equipmentAvailable.getSnowboardsList().isEmpty())
             throw new IllegalStateException("Attrezzature non disponibili");
 
         //Controlla che gli sci e gli snowboards indicati siano tra quelli disponibili del rifornitore
@@ -76,33 +79,33 @@ public class ReservationService {
         };
 
         //Richiama la funzione attrezzaturaComune e fa il controllo se è presente lo snowboard
+        //Filtra la lista mantenendo solo gli Id degli sky utilizzando gli stream
+        List<Integer> listIdSnowboard = equipmentAvailable.getSnowboardsList().stream().map(SnowboardDTO::getId).collect(Collectors.toList());
         reservationRequest.getSnowboardsList()
                 .stream()
-                .filter(cur ->
-                        attrezzaturaComune.test(cur.getId(), equipmentAvailable.getSnowboardList()))
+                .filter(cur -> attrezzaturaComune.test(cur.getId(), listIdSnowboard))
                 .toList();
 
         //Come sopra solo che con gli sci
-        reservationRequest.getSkyList()
+        List<Integer> listIdSky = equipmentAvailable.getSkisList().stream().map(SkiDTO::getId).collect(Collectors.toList());
+        reservationRequest.getSkisList()
                 .stream()
-                .filter(cur -> attrezzaturaComune.test(cur.getId(), equipmentAvailable.getSkyList()))
+                .filter(cur -> attrezzaturaComune.test(cur.getId(), listIdSky))
                 .toList();
 
         //Vengono prenotati gli sci/snowboards
-        setEnableSci(reservationRequest.getSkyList(), false);
+        setEnableSci(reservationRequest.getSkisList(), false);
         setEnableSnowboards(reservationRequest.getSnowboardsList(), false);
 
         Reservation newReservation = new Reservation(
                 user,
                 vendor,
-                reservationRequest.getSkyList(),
+                reservationRequest.getSkisList(),
                 reservationRequest.getSnowboardsList(),
                 startDateReservation,
                 endDateReservation
         );
-
         reservationRepository.save(newReservation);
-
         return newReservation;
     }
 
@@ -115,7 +118,7 @@ public class ReservationService {
         for (Reservation pre : reservations) {
             //Se la prenotazione è scaduta gli sci/snowboards diventano disponibili
             if (prenotazioneScaduta(pre)) {
-                setEnableSci(pre.getSkyReserved(), true);
+                setEnableSci(pre.getSkiReserved(), true);
                 setEnableSnowboards(pre.getSnowboardReserved(), true);
             }
         }
@@ -137,16 +140,16 @@ public class ReservationService {
      * @return
      */
     private boolean errorDateReservation(LocalDate start, LocalDate end) {
-        return !start.isBefore(end) || start.isBefore(LocalDate.now());
+        return start.isAfter(end) || start.isBefore(LocalDate.now());
     }
 
     /**
      * Il metodo data una lista di sci ed un valore, aggiorna per ogni sci il corrispondente valore di enable
-     * @param prenotaSky
+     * @param prenotaSki
      */
-    private void setEnableSci(List<Sky> prenotaSky, boolean enable) {
-        prenotaSky.forEach(sci -> {
-            skyRepository.setEnable(enable, sci.getId());
+    private void setEnableSci(List<Ski> prenotaSki, boolean enable) {
+        prenotaSki.forEach(sci -> {
+            skiRepository.setEnable(enable, sci.getId());
         });
     }
     /**

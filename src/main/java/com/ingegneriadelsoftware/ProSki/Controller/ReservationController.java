@@ -2,6 +2,7 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.ReservationRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.ReservationResponse;
 import com.ingegneriadelsoftware.ProSki.Service.ReservationService;
 import com.ingegneriadelsoftware.ProSki.Service.VendorService;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DateTimeException;
 
 @RestController
-@RequestMapping("/api/v1/prenotazione")
+@RequestMapping("/api/v1/reservation")
 @RequiredArgsConstructor
 public class ReservationController {
 
@@ -23,21 +24,26 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPrenotazione(@Valid @RequestBody ReservationRequest request, HttpServletRequest servletRequest) {
+    public ResponseEntity<?> createReservation(@Valid @RequestBody ReservationRequest request, HttpServletRequest servletRequest) {
         try{
-            ReservationResponse reservationResponse = DTOManager.toPrenotazioneResponseByPrenotazione(reservationService.createReservation(request, servletRequest));
+            ReservationResponse reservationResponse = DTOManager.toReservationResponseByReservation(reservationService.createReservation(request, servletRequest));
             return ResponseEntity.ok(reservationResponse);
         }catch(IllegalStateException | DateTimeException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/getAttrezzature/{id}")
-    public ResponseEntity<?> getAttrezzatureDisponibiliByRifornitore(@PathVariable Integer id) {
+    /**
+     * EndPoint da chiamare prima di creare una prenotazione, per prendere la lista delle attrezzature del rifornitore
+     * @param idVendor
+     * @return
+     */
+    @GetMapping("/getEquipment/vendor/{idVendor}")
+    public ResponseEntity<EquipmentAvailableResponse> getEquipmentAvailableByVendor(@PathVariable Integer idVendor) {
         try{
-            return ResponseEntity.ok(vendorService.getEquipmentAvailable(id));
+            return ResponseEntity.ok(vendorService.getEquipmentAvailable(idVendor));
         }catch (IllegalStateException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(EquipmentAvailableResponse.builder().message(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }
     }
 

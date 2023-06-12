@@ -28,10 +28,10 @@ public class Reservation {
     private Vendor vendor;
 
     @ManyToMany
-    @JoinTable(name = "reservation_sky", joinColumns =
+    @JoinTable(name = "reservation_ski", joinColumns =
     @JoinColumn(name = "reservation"), inverseJoinColumns =
-    @JoinColumn(name = "sky"))
-    private List<Sky> skyReserved;
+    @JoinColumn(name = "ski"))
+    private List<Ski> skiReserved;
 
     @ManyToMany
     @JoinTable(name = "reservation_snowboard", joinColumns =
@@ -45,10 +45,10 @@ public class Reservation {
     @Column
     private LocalDate endDate;
 
-    public Reservation(User user, Vendor vendor, List<Sky> skyReserved, List<Snowboard> snowboardReserved, LocalDate startDate, LocalDate endDate) {
+    public Reservation(User user, Vendor vendor, List<Ski> skiReserved, List<Snowboard> snowboardReserved, LocalDate startDate, LocalDate endDate) {
         this.user = user;
         this.vendor = vendor;
-        this.skyReserved = skyReserved;
+        this.skiReserved = skiReserved;
         this.snowboardReserved = snowboardReserved;
         this.startDate = startDate;
         this.endDate = endDate;

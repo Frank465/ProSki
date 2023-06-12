@@ -3,19 +3,21 @@ package com.ingegneriadelsoftware.ProSki.Service;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorEquipmentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import com.ingegneriadelsoftware.ProSki.Model.Location;
 import com.ingegneriadelsoftware.ProSki.Model.Vendor;
-import com.ingegneriadelsoftware.ProSki.Model.Sky;
+import com.ingegneriadelsoftware.ProSki.Model.Ski;
 import com.ingegneriadelsoftware.ProSki.Model.Snowboard;
 import com.ingegneriadelsoftware.ProSki.Repository.VendorRepository;
-import com.ingegneriadelsoftware.ProSki.Repository.SkyRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.SkiRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.SnowboardRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class VendorService {
 
     private final VendorRepository vendorRepository;
     private final LocationService locationService;
-    private final SkyRepository skyRepository;
+    private final SkiRepository skiRepository;
     private final SnowboardRepository snowboardRepository;
 
     /**
@@ -48,23 +50,36 @@ public class VendorService {
      * @param IdRifornitore
      * @return
      */
-    public EquipmentAvailableResponse getEquipmentAvailable(Integer idRifornitore) {
-        Vendor vendor = getRifornitoreById(idRifornitore);
-        List<Sky> sky = skyRepository.findByVendor(vendor);
+    public EquipmentAvailableResponse getEquipmentAvailable(Integer idVendor) {
+        Vendor vendor = getRifornitoreById(idVendor);
+        List<Ski> ski = skiRepository.findByVendor(vendor);
         List<Snowboard> snowboards = snowboardRepository.findByVendor(vendor);
 
         List<Snowboard> snowboardsAvaiable = snowboards.stream()
                 .filter(cur -> cur.isEnable())  // filtra solo gli snowboards che non sono stati prenotati
                 .toList(); //Inserisci gli elementi nella lista
 
-        List<Sky> skyAvaiable = sky.stream()
+        List<Ski> skiAvaiable = ski.stream()
                 .filter(cur -> cur.isEnable())  // filtra solo gli sci che non sono stati prenotati
                 .toList(); //Inserisci gli elementi nella lista
 
+        //Creo una lista di snowboard dto con i parametri da tornare al client
+        List<SnowboardDTO> snowboardsDTO = new ArrayList<>();
+        snowboardsAvaiable.forEach(cur -> snowboardsDTO.add(SnowboardDTO.builder()
+                .id(cur.getId())
+                .measure(cur.getMeasure()).build()));
+
+        //Creo una lista di sci dto con i parametri da tornare al client
+        List<SkiDTO> skisDTO = new ArrayList<>();
+        skiAvaiable.forEach(cur -> skisDTO.add(SkiDTO.builder()
+                .id(cur.getId())
+                .measure(cur.getMeasure()).build()));
+
         return EquipmentAvailableResponse
                 .builder()
-                .snowboardList(snowboardsAvaiable.stream().map(cur->cur.getId()).toList())
-                .skyList(skyAvaiable.stream().map(cur->cur.getId()).toList())
+                .vendorEmail(vendor.getEmail())
+                .snowboardsList(snowboardsDTO)
+                .skisList(skisDTO)
                 .build();
     }
 
@@ -97,17 +112,18 @@ public class VendorService {
      */
     public String createEquipment(VendorEquipmentRequest request) {
         Vendor vendor = getVendorByEmail(request.getVendorEmail());
-        insertSky(request.getSky(), vendor);
+        insertSky(request.getSki(), vendor);
         insertSnowboards(request.getSnowboards(), vendor);
         return "Attrezzature inserite correttamente";
     }
 
     /**
      * Per ogni sci viene settato il rifornitore e salvato nel DB lo sci
-     * @param sky
+     * @param ski
      */
-    private void insertSky(List<Sky> sky, Vendor rif) {
-        sky.forEach(cur -> {cur.setVendor(rif);skyRepository.save(cur);});
+    private void insertSky(List<Ski> ski, Vendor rif) {
+        ski.forEach(cur -> {cur.setVendor(rif);
+            skiRepository.save(cur);});
     }
 
     /**

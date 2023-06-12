@@ -1,5 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.DTO.Response;
 
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class EquipmentAvailableResponse {
-    List<Integer> skyList;
-    List<Integer> snowboardList;
+    String vendorEmail;
+    List<SkiDTO> skisList;
+    List<SnowboardDTO> snowboardsList;
+    String message;
 }

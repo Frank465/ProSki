@@ -1,6 +1,6 @@
 package com.ingegneriadelsoftware.ProSki.DTO.Request;
 
-import com.ingegneriadelsoftware.ProSki.Model.Sky;
+import com.ingegneriadelsoftware.ProSki.Model.Ski;
 import com.ingegneriadelsoftware.ProSki.Model.Snowboard;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,7 +29,7 @@ public class ReservationRequest {
     private String vendorEmail;
 
     @NotNull
-    private List<Sky> skyList;
+    private List<Ski> skisList;
 
     @NotNull
     private List<Snowboard> snowboardsList;

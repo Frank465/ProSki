@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Sky {
+public class Ski {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,8 @@ public class Sky {
     @JoinColumn(name = "id_vendor")
     private Vendor vendor;
 
-    @ManyToMany(mappedBy = "skyReserved")
-    private List<Reservation> reservationSky;
+    @ManyToMany(mappedBy = "skiReserved")
+    private List<Reservation> reservationSki;
 
     @Override
     public String toString() {
