@@ -1,0 +1,13 @@
+package com.ingegneriadelsoftware.ProSki.Email;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class OfferCreatorEmail extends CreatorEmail {
+    private final String name;
+    private final String date;
+
+    public BuildEmail createEmail() {
+        return new BuildRegisterEmail(name, date);
+    }
+}

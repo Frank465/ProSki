@@ -1,8 +1,8 @@
 package com.ingegneriadelsoftware.ProSki.Security;
 
-import com.ingegneriadelsoftware.ProSki.Model.Ruolo;
-import com.ingegneriadelsoftware.ProSki.Model.Utente;
-import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
+import com.ingegneriadelsoftware.ProSki.Model.Role;
+import com.ingegneriadelsoftware.ProSki.Model.User;
+import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +24,9 @@ public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final UtenteRepository utenteRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtResolverException jwtResolverException;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,25 +35,25 @@ public class WebSecurityConfig {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v*/profilo/**").permitAll()
-                .requestMatchers("/api/v2/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtResolverException, JwtAuthenticationFilter.class);
         return http.build();
     }
 
     @PostConstruct
     public void createAdmin() {
-        Optional<Utente> admin = utenteRepository.findUserByEmail("admin@proski.com");
+        Optional<User> admin = userRepository.findUserByEmail("admin@proski.com");
         if(admin.isEmpty()) {
-            utenteRepository.save(new Utente(
+            userRepository.save(new User(
                     passwordEncoder.encode("admin"),
                     "admin@proski.com",
-                    Ruolo.ADMIN,
+                    Role.ADMIN,
                     true
                     )
             );

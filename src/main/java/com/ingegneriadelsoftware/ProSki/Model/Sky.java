@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Snowboard {
+public class Sky {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,15 +22,15 @@ public class Snowboard {
     private boolean enable = true;
 
     @ManyToOne
-    @JoinColumn(name = "id_vendor", nullable = false)
+    @JoinColumn(name = "id_vendor")
     private Vendor vendor;
 
-    @ManyToMany(mappedBy = "snowboardReserved")
-    private List<Reservation> reservation;
+    @ManyToMany(mappedBy = "skyReserved")
+    private List<Reservation> reservationSky;
 
     @Override
     public String toString() {
-        return "Snowboards{id='" + id +"}";
+        return "Sci{id='" + id + "}";
     }
 
 }

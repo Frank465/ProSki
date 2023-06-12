@@ -104,10 +104,11 @@ public class JwtService {
      * @param servletRequest
      * @return
      */
-    public String findEmailUtenteBySecurityContext(HttpServletRequest servletRequest) {
+    public String findEmailUtenteByHttpServletRequest(HttpServletRequest servletRequest) {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
         String authHeader = servletRequest.getHeader("Authorization");
-        String jwt = authHeader.substring(7); //Il token si trova nella posizione dopo la 7
+        //Nel header il token si trova nella posizione dopo la 7
+        String jwt = authHeader.substring(7);
         return exctractUsername(jwt);
     }
 }

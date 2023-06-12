@@ -1,7 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Repository;
 
 import com.ingegneriadelsoftware.ProSki.Model.Vendor;
-import com.ingegneriadelsoftware.ProSki.Model.Snowboard;
+import com.ingegneriadelsoftware.ProSki.Model.Sky;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SnowboardRepository extends CrudRepository<Snowboard, Integer> {
+public interface SkyRepository extends CrudRepository<Sky, Integer> {
 
-    List<Snowboard> findByVendor(Vendor vendor);
+    List<Sky> findByVendor(Vendor vendor);
 
     @Transactional
     @Modifying
-    @Query("UPDATE Snowboard s SET s.enable =?2 WHERE s.id=?1")
-    void setEnable(Integer id, boolean enable);
+    @Query("UPDATE Sky s  SET s.enable =?1  WHERE s.id = ?2")
+    void setEnable(boolean enable, Integer idSky);
 
 }

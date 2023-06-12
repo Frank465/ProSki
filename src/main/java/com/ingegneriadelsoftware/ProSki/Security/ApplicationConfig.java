@@ -1,6 +1,6 @@
 package com.ingegneriadelsoftware.ProSki.Security;
 
-import com.ingegneriadelsoftware.ProSki.Repository.UtenteRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UtenteRepository repository;
+    private final UserRepository repository;
 
     @Bean
     public UserDetailsService userDetailsService() {

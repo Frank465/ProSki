@@ -1,7 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Security;
 
 import com.ingegneriadelsoftware.ProSki.Service.JwtService;
-import com.ingegneriadelsoftware.ProSki.Service.UtenteService;
+import com.ingegneriadelsoftware.ProSki.Service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +25,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UtenteService userDetailsService;
+    private final UserService userDetailsService;
 
     /**
      * Il primo fitro che fa i controlli sul tipo di richiesta, sugli utenti e sui token
