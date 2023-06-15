@@ -1,6 +1,6 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
-import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.EmailSender;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;

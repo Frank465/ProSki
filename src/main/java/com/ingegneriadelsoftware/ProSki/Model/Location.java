@@ -32,6 +32,9 @@ public class Location {
     @OneToMany(mappedBy ="location")
     private List<CardSkipass> cardSkipasses;
 
+    @OneToMany(mappedBy = "location")
+    List<LocationMessage> locationMessages;
+
     @Column
     private Double priceSubscription;
 

@@ -37,6 +37,9 @@ public class Vendor {
     @OneToMany(mappedBy = "vendor")
     private List<Snowboard> snowboardAvailable;
 
+    @OneToMany(mappedBy = "vendor")
+    private List<VendorMessage> vendorMessages;
+
     public Vendor(String name, String email, Location location) {
         this.name = name;
         this.email = email;

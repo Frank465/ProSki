@@ -18,9 +18,6 @@ public class Snowboard {
     @Column
     private Integer measure;
 
-    @Column
-    private boolean enable = true;
-
     @ManyToOne
     @JoinColumn(name = "id_vendor", nullable = false)
     private Vendor vendor;

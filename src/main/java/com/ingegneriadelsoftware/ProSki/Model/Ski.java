@@ -18,9 +18,6 @@ public class Ski {
     @Column
     private Integer measure;
 
-    @Column
-    private boolean enable = true;
-
     @ManyToOne
     @JoinColumn(name = "id_vendor")
     private Vendor vendor;

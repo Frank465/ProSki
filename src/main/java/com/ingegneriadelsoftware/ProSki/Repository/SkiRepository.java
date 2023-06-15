@@ -14,10 +14,4 @@ import java.util.List;
 public interface SkiRepository extends CrudRepository<Ski, Integer> {
 
     List<Ski> findByVendor(Vendor vendor);
-
-    @Transactional
-    @Modifying
-    @Query("UPDATE Ski s  SET s.enable =?1  WHERE s.id = ?2")
-    void setEnable(boolean enable, Integer idSky);
-
 }

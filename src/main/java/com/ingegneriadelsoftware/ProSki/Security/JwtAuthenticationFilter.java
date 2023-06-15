@@ -1,6 +1,5 @@
 package com.ingegneriadelsoftware.ProSki.Security;
 
-import com.ingegneriadelsoftware.ProSki.Service.JwtService;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final UserService userDetailsService;
 
     /**
@@ -45,12 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
-        userEmail = jwtService.exctractUsername(jwt);
+        userEmail = jwtUtils.exctractUsername(jwt);
         //Controllo se l'utente esiste ed è gia autenticato
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             //controllo se il token è ancora valido
-            if(jwtService.isTokenValid(jwt, userDetails)) {
+            if(jwtUtils.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

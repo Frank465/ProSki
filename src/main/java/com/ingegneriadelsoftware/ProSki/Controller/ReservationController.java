@@ -32,19 +32,4 @@ public class ReservationController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
-    /**
-     * EndPoint da chiamare prima di creare una prenotazione, per prendere la lista delle attrezzature del rifornitore
-     * @param idVendor
-     * @return
-     */
-    @GetMapping("/getEquipment/vendor/{idVendor}")
-    public ResponseEntity<EquipmentAvailableResponse> getEquipmentAvailableByVendor(@PathVariable Integer idVendor) {
-        try{
-            return ResponseEntity.ok(vendorService.getEquipmentAvailable(idVendor));
-        }catch (IllegalStateException ex) {
-            return new ResponseEntity<>(EquipmentAvailableResponse.builder().message(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
 }

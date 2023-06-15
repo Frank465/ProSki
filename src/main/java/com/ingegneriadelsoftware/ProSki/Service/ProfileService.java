@@ -8,6 +8,7 @@ import com.ingegneriadelsoftware.ProSki.Model.Role;
 import com.ingegneriadelsoftware.ProSki.Model.Gender;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
+import com.ingegneriadelsoftware.ProSki.Security.JwtUtils;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class ProfileService {
     /**
      * attributi che vengono iniettati nella classe per utilizzare i vari services
      */
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final UserService userService;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
@@ -77,7 +78,7 @@ public class ProfileService {
         User user = userRepository.findByToken(token).orElseThrow(()->new IllegalStateException("Utente non esiste"));
         if(user.isEnable()) throw new IllegalStateException("l'utente è gia registrato");
         try{
-            jwtService.isTokenValid(token, user);
+            jwtUtils.isTokenValid(token, user);
         }catch(ExpiredJwtException e) {
             userService.deleteUserByEmail(user.getEmail());
             throw new IllegalStateException("Token scaduto, registrazione fallita");
@@ -99,7 +100,7 @@ public class ProfileService {
         //Prende le credenziali dell'utente che sta facendo l'autenticazione
         user = (UserDetails) auth.getPrincipal();
         //Genera il token associato all'utente con una durata di 24 ore
-        String jwtToken = jwtService.generateToken(
+        String jwtToken = jwtUtils.generateToken(
                 user,
                 new Date(System.currentTimeMillis() + 1000 * 3600 * 24)
         );

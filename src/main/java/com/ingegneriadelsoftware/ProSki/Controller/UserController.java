@@ -27,7 +27,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final LessonService lessonService;
 
     @GetMapping("/lezioni")
     public ResponseEntity<?> getAllLessonsByUtente(HttpServletRequest servletRequest) {
@@ -43,21 +42,12 @@ public class UserController {
         }
     }
 
-    @PostMapping("/iscrizione/lezione")
-    public ResponseEntity<String> registrationUserLesson(@RequestParam("id") Integer lessonId, HttpServletRequest servletRequest) {
+    @PostMapping("/lesson/registration/{id_lesson}")
+    public ResponseEntity<String> registrationUserLesson(@PathVariable("id_lesson") Integer lessonId, HttpServletRequest servletRequest) {
         try{
             return ResponseEntity.ok(userService.registrationLesson(lessonId, servletRequest));
         }catch(EntityNotFoundException | IllegalStateException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @GetMapping("/tutte/lezioni")
-    public ResponseEntity<?> getLessons() {
-        try{
-            return ResponseEntity.ok(lessonService.getListLessons());
-        }catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>("Non ci sono lezioni disponibili", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -1,10 +1,12 @@
 package com.ingegneriadelsoftware.ProSki.Utils;
 
-import org.springframework.cglib.core.Local;
+import com.ingegneriadelsoftware.ProSki.Model.User;
+import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
+import com.ingegneriadelsoftware.ProSki.Security.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class Utils {
 
@@ -18,8 +20,6 @@ public class Utils {
     public static final String ERROR_LOCALDATE = "La data deve essere nel formato dd/MM/yyyy";
     public static final String ERROR_LOCALDATETIME = "La data deve essere nel formato dd/MM/yyyy HH:mm";
     public static final String ERROR_LOCALTIME = "L'orario deve essere nel formato HH:mm";
-    public static final String IS_DOUBLE = "^((\\d*\\.\\d+)|(\\d+\\.?))$";
-
 
     public static LocalDateTime formatterDataTime(String data) throws DateTimeException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -34,5 +34,10 @@ public class Utils {
     public static LocalTime formatterTime(String time) throws DateTimeException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return LocalTime.parse(time, formatter);
+    }
+
+    public static User getUserFromHeader(HttpServletRequest httpServletRequest, UserRepository userRepository, JwtUtils jwtUtils) {
+        String userEmail = jwtUtils.findEmailUtenteByHttpServletRequest(httpServletRequest);
+        return userRepository.findUserByEmail(userEmail).orElseThrow(()->new IllegalStateException("L'utente non esiste"));
     }
 }

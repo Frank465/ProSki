@@ -15,9 +15,4 @@ public interface SnowboardRepository extends CrudRepository<Snowboard, Integer> 
 
     List<Snowboard> findByVendor(Vendor vendor);
 
-    @Transactional
-    @Modifying
-    @Query("UPDATE Snowboard s SET s.enable =?2 WHERE s.id=?1")
-    void setEnable(Integer id, boolean enable);
-
 }

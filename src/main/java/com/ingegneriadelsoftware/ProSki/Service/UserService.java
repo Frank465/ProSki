@@ -2,14 +2,15 @@ package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.BuySkipassRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.UserPlanRequest;
-import com.ingegneriadelsoftware.ProSki.Email.CreatorEmail;
-import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
-import com.ingegneriadelsoftware.ProSki.Email.RegisterCreatorEmail;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.CreatorEmail;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.EmailSender;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.RegisterCreatorEmail;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Repository.BuySkipassRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.LessonRepository;
-import com.ingegneriadelsoftware.ProSki.Repository.SkipassRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.CardSkipassRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
+import com.ingegneriadelsoftware.ProSki.Security.JwtUtils;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,7 +25,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -32,11 +32,11 @@ public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final EmailSender emailSend;
     private final LessonRepository lessonRepository;
     private final PlanService planService;
-    private final SkipassRepository skipassRepository;
+    private final CardSkipassRepository cardSkipassRepository;
     private final OfferService offerService;
     private final BuySkipassRepository buySkipassRepository;
     private final LessonService lessonService;
@@ -45,6 +45,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws IllegalStateException {
         return userRepository.findUserByEmail(email).orElseThrow(()-> new IllegalStateException("l'utente non è stato trovato"));
     }
+
 
     /**
      * Controllo se l'utente è già registrato.
@@ -55,19 +56,22 @@ public class UserService implements UserDetailsService {
      * @throws IllegalStateException
      */
     public String registration(User user) throws IllegalStateException {
-        User userExists = (User) loadUserByUsername(user.getEmail());
-        //Controllo che l'utente non sia ancora registrato
-        if (userExists.isEnable()) throw new IllegalStateException("l'utente è già stato registrato correttamente");
-        //Controllo che il token dato in fase di richiesta registrazione sia ancora valido
-        try {
-            jwtService.isTokenValid(userExists.getToken(), userExists);
-        } catch (ExpiredJwtException e) {
-            deleteUserByEmail(userExists.getEmail());
-            throw new IllegalStateException("token precedente scaduto, registrare nuovamente l'utente");
+        //Controllo che l'utente sia correttamente registrato: esiste nella base di dati e il suo stato uguale a enable
+        Optional<User> utenteEsiste = userRepository.findUserByEmail(user.getEmail());
+        if(utenteEsiste.isPresent()) {
+            if (utenteEsiste.get().isEnable())
+                throw new IllegalStateException("l'utente esiste");
+            try {
+                jwtUtils.isTokenValid(utenteEsiste.get().getToken(), utenteEsiste.get());
+            } catch (ExpiredJwtException e) {
+                deleteUserByEmail(utenteEsiste.get().getEmail());
+                throw new IllegalStateException("token precedente scaduto, registrare nuovamente l'utente");
+            }
+            throw new IllegalStateException("l'utente esiste");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         //Genera il token per l'utente con un durata di 15 minuti
-        String jwtToken = jwtService.generateToken(
+        String jwtToken = jwtUtils.generateToken(
                 user,
                 new Date(System.currentTimeMillis() + 15 * 1000 * 60)
         );
@@ -89,7 +93,7 @@ public class UserService implements UserDetailsService {
      */
     public List<Lesson> getLezioniByUtente(HttpServletRequest servletRequest) throws EntityNotFoundException {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
-        String emailUser = jwtService.findEmailUtenteByHttpServletRequest(servletRequest);
+        String emailUser = jwtUtils.findEmailUtenteByHttpServletRequest(servletRequest);
         User user = (User) loadUserByUsername(emailUser);
         return user.getUsersLessons();
     }
@@ -103,7 +107,7 @@ public class UserService implements UserDetailsService {
      */
     public String registrationLesson(Integer lessonId, HttpServletRequest requestServlet) throws EntityNotFoundException {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
-        String userEmail = jwtService.findEmailUtenteByHttpServletRequest(requestServlet);
+        String userEmail = jwtUtils.findEmailUtenteByHttpServletRequest(requestServlet);
         User user = (User) loadUserByUsername(userEmail);
         //Controllo se la lezione esiste
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new EntityNotFoundException("Lezione non trovata"));
@@ -138,14 +142,14 @@ public class UserService implements UserDetailsService {
      */
     public BuySkipass buySkipassUser(BuySkipassRequest request, HttpServletRequest httpRequest) {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta facendo l'acquisto
-        String userEmail = jwtService.findEmailUtenteByHttpServletRequest(httpRequest);
+        String userEmail = jwtUtils.findEmailUtenteByHttpServletRequest(httpRequest);
         User user = (User) loadUserByUsername(userEmail);
         //Controllo data acquisto
         LocalDate date = Utils.formatterData(request.getDate());
         if(date.isBefore(LocalDate.now())) throw new IllegalStateException("Data inserita errata");
-        Integer discount = null;
+        Integer discount = 0;
         //Controllo esistenza tessera
-        CardSkipass cardSkipass = skipassRepository.findByCardCode(request.getCardCode())
+        CardSkipass cardSkipass = cardSkipassRepository.findByCardCode(request.getCardCode())
                 .orElseThrow(()->new IllegalStateException("La card non esiste"));
         //Controllo che per la card non ci siano acquisti già effettuati dopo la data odierna
         List<BuySkipass> skipassBought = cardSkipass.getBuySkipasses();

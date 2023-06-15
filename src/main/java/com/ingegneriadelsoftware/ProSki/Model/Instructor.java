@@ -39,6 +39,9 @@ public class Instructor {
     @OneToMany(mappedBy = "instructor")
     private List<Lesson> lessonList;
 
+    @OneToMany(mappedBy = "instructor")
+    List<InstructorMessage> instructorMessages;
+
     public Instructor(String name, String surname, String email, String speciality, Location location) {
         this.name = name;
         this.surname = surname;

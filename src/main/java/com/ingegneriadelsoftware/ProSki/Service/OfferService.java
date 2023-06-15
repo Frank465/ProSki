@@ -1,14 +1,13 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.OfferRequest;
-import com.ingegneriadelsoftware.ProSki.Email.CreatorEmail;
-import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
-import com.ingegneriadelsoftware.ProSki.Email.OfferCreatorEmail;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.CreatorEmail;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.EmailSender;
+import com.ingegneriadelsoftware.ProSki.EmailFactory.OfferCreatorEmail;
 import com.ingegneriadelsoftware.ProSki.Model.Offer;
 import com.ingegneriadelsoftware.ProSki.Model.Plan;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Repository.OfferRepository;
-import com.ingegneriadelsoftware.ProSki.Repository.PlanRepository;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * La classe contiene tutti i metodi necessari per gestire le offerte

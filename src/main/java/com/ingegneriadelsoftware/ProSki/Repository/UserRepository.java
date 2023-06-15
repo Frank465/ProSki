@@ -23,11 +23,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
             "SET a.enable = TRUE WHERE a.email = ?1")
     void enableUser(String email);
 
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM User a WHERE a.email = ?1")
-    void deleteByEmail(String email);
-
     Optional<User> findByToken(String token);
 
     List<User> findAllByGender(Gender gender);

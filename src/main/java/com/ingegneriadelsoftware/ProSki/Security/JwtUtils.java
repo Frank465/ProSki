@@ -1,21 +1,20 @@
-package com.ingegneriadelsoftware.ProSki.Service;
+package com.ingegneriadelsoftware.ProSki.Security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
-@Service
-public class JwtService {
+@Component
+public class JwtUtils {
 
     /**
      * Chiave per la decodifica da 256byte
@@ -89,7 +88,7 @@ public class JwtService {
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = exctractUsername(token);
-        return(username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return(username.equals(userDetails.getUsername()) && !isTokenExpired(token) && userDetails.isEnabled());
     }
 
     /**

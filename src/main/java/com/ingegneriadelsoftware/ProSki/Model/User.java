@@ -70,6 +70,15 @@ public class User implements UserDetails {
     @JoinColumn(name = "lesson"))
     private List<Lesson> usersLessons;
 
+    @OneToMany(mappedBy = "user")
+    List<VendorMessage> vendorMessages;
+
+    @OneToMany(mappedBy = "user")
+    List<LocationMessage> locationMessages;
+
+    @OneToMany(mappedBy = "user")
+    List<InstructorMessage> instructorMessages;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

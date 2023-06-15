@@ -1,4 +1,4 @@
-package com.ingegneriadelsoftware.ProSki.Email;
+package com.ingegneriadelsoftware.ProSki.EmailFactory;
 
 import org.springframework.stereotype.Component;
 

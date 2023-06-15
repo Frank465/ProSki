@@ -1,8 +1,10 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.InstructorRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
 import com.ingegneriadelsoftware.ProSki.Service.InstructorService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,15 @@ public class InstructorController {
         try {
             return ResponseEntity.ok(instructorService.insertInstructor(request));
         }catch (IllegalStateException | EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("create/message")
+    public ResponseEntity<?> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
+        try {
+            return ResponseEntity.ok(instructorService.createMessage(request, httpRequest));
+        } catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
