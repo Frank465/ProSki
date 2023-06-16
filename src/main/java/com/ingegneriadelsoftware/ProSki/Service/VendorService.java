@@ -1,9 +1,13 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
+import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorEquipmentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.CommentDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import com.ingegneriadelsoftware.ProSki.ForumStrategy.ConcreteStrategyVendor;
@@ -35,6 +39,7 @@ public class VendorService {
     private final JwtUtils jwtUtils;
     private final ReservationRepository reservationRepository;
     private final VendorMessageRepository vendorMessageRepository;
+    private final VendorCommentRepository vendorCommentRepository;
 
     /**
      * Il metodo crea un rifornitore
@@ -85,18 +90,11 @@ public class VendorService {
         });
         //Creo una lista di snowboard dto con i parametri da tornare al client
         List<SnowboardDTO> snowboardsDTO = new ArrayList<>();
-        skiAvaiable.forEach(cur -> snowboardsDTO.add(SnowboardDTO.builder()
-                .id(cur.getId())
-                .measure(cur.getMeasure()).build()));
-
+        skiAvaiable.forEach(cur -> snowboardsDTO.add(SnowboardDTO.builder().id(cur.getId()).measure(cur.getMeasure()).build()));
         //Creo una lista di sci dto con i parametri da tornare al client
         List<SkiDTO> skisDTO = new ArrayList<>();
-        skiAvaiable.forEach(cur -> skisDTO.add(SkiDTO.builder()
-                .id(cur.getId())
-                .measure(cur.getMeasure()).build()));
-
-        return EquipmentAvailableResponse
-                .builder()
+        skiAvaiable.forEach(cur -> skisDTO.add(SkiDTO.builder().id(cur.getId()).measure(cur.getMeasure()).build()));
+        return EquipmentAvailableResponse.builder()
                 .vendorEmail(vendor.getEmail())
                 .snowboardsList(snowboardsDTO)
                 .skisList(skisDTO)
@@ -145,17 +143,78 @@ public class VendorService {
         snowboards.forEach(cur -> {cur.setVendor(vendor); snowboardRepository.save(cur);});
     }
 
+    /**
+     * Un utente iscritto può creare dei messaggi nel forum solo se ha prenotato almeno una volta delle attrezzature dal
+     * rifornitore indicato. La creazione dei messaggi avviene tramite l'utilizzo del pattern Strategy
+     * @param request
+     * @param httpServletRequest
+     * @return
+     */
     public String createMessage(MessageRequest request, HttpServletRequest httpServletRequest) {
         //Controllo ed estrapolazione utente dal Context di Security
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
+        //Controllo che l'utente abbia effettuato una prenotazione dal rifornitore
+        controlUserReservation(request.getUsername(), user);
+        //Set della strategia di publicazione del messaggio
+        context.setPublishingStrategy(new ConcreteStrategyVendor(vendorRepository, vendorMessageRepository));
+        //Eseguo la strategia di pubblicazione del messaggio per il rifornitore
+        return context.executeMessageStrategy(request.getUsername(), user, request.getMessage());
+    }
+
+    /**
+     * Un utente iscritto può commentare un messaggio presente solo quando ha effettuato almeno una volta la prenotazione
+     * delle attrezzature dal rifornitore indicato. La creazione dei messaggi avviene tramite l'utilizzo del pattern Strategy
+     * @param request
+     * @param httpServletRequest
+     * @return
+     */
+    public String createCommentToMessage(CommentRequest request, HttpServletRequest httpServletRequest) {
+        //Controllo ed estrapolazione utente dal Context di Security
+        User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
+        //Controllo che l'utente abbia effettuato una prenotazione dal rifornitore
+        controlUserReservation(request.getUsername(), user);
+        VendorMessage vendorMessage = vendorMessageRepository.findById(request.getIdMessage()).orElseThrow(()-> new IllegalStateException("Il messaggio indicato non esiste"));
+        //Set della strategia di publicazione del commento
+        context.setPublishingStrategy(new ConcreteStrategyVendor(vendorRepository, vendorMessageRepository, vendorCommentRepository));
+        //Eseguo la strategia di pubblicazione del messaggio per il rifornitore
+        return context.executeCommentStrategy(request.getIdMessage(), user, request.getComment());
+    }
+
+    /**
+     * Controlla che l'utente che vuole inserire un messaggio o un commento abbia almeno una volta effettuato una prenotazione
+     * dal rifornitore indicato
+     * @param request
+     * @param httpServletRequest
+     */
+    private void controlUserReservation(String username, User user) {
         //Controllo esistenza rifornitore e tutte le sue prenotazioni
-        Vendor vendor = getVendorByEmail(request.getUsername());
+        Vendor vendor = getVendorByEmail(username);
         List<Reservation> vendorReservations = vendor.getReservations();
         if(vendorReservations.isEmpty()) throw new IllegalStateException("Non sono presenti prenotazioni per questo rifornitore");
+        //Filtro la lista per prenotazoni di un utente
         List<Reservation> userReservation = vendorReservations.stream().filter(cur-> cur.getUser().equals(user)).toList();
         if(userReservation.isEmpty()) throw new IllegalStateException("L'utente non ha mai effettuato prenotazioni a questo rifornitore " + vendor.getName());
+    }
 
-        context.setPublishingStrategy(new ConcreteStrategyVendor(vendorRepository, vendorMessageRepository));
-        return context.executeStrategy(request.getUsername(), user, request.getMessage());
+    /**
+     * Dato un rifornitore vengono ritornati tutti i messaggi che gli utenti hanno pubblicato e i rispettivi commenti
+     * @param idLocation
+     * @return
+     */
+    public MessageResponse getAllMessage(Integer idRifornitore) {
+        Vendor vendor = vendorRepository.findById(idRifornitore).orElseThrow(()-> new IllegalStateException("Il Rifornitore non esiste"));
+        List<VendorMessage> vendorsMessage = vendorMessageRepository.findAllByVendor(vendor);
+
+        List<MessageDTO> messageDTOS = new ArrayList<>();
+        //Crea una commentDTO nella quale ci sono i dati importanti di tutti i commenti legati ad un messaggio
+        //Prende tutti i messaggi di un rifornitore che vengono gestiti come DTO e vengono agigunti i relativi commenti per ogni messaggio
+        vendorsMessage.forEach(cur -> {
+            List<CommentDTO> commentDTOS = new ArrayList<>();
+            cur.getVendorComments().forEach(elem -> {
+                commentDTOS.add(CommentDTO.builder().id(elem.getCommentId()).user(elem.getUser().getEmail()).comment(elem.getComment()).build());
+            });
+            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getEmail()).message(cur.getMessage()).comments(commentDTOS).build());
+        });
+        return MessageResponse.builder().idLocation(idRifornitore).listMessage(messageDTOS).build();
     }
 }

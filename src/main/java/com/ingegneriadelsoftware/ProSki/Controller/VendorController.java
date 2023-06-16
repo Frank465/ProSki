@@ -1,10 +1,8 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
-import com.ingegneriadelsoftware.ProSki.DTO.Request.EquipementVendorAvailable;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorEquipmentRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.VendorRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
 import com.ingegneriadelsoftware.ProSki.Service.VendorService;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
@@ -55,6 +53,15 @@ public class VendorController {
         }
     }
 
+    @PostMapping("/create/comment")
+    public ResponseEntity<?> createCommentToVendorMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
+        try {
+            return ResponseEntity.ok(vendorService.createCommentToMessage(request, httpRequest));
+        } catch(EntityNotFoundException | IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     /**
      * EndPoint da chiamare prima di creare una prenotazione, per prendere la lista delle attrezzature del rifornitore
      * @param request
@@ -68,4 +75,15 @@ public class VendorController {
             return new ResponseEntity<>(EquipmentAvailableResponse.builder().message(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/get/all/message/{id_vendor}")
+    public ResponseEntity<MessageResponse> getAllMessagesByVendor(@PathVariable("id_vendor") Integer idLocation) {
+        try{
+            return ResponseEntity.ok(vendorService.getAllMessage(idLocation));
+        } catch(IllegalStateException e) {
+            return new ResponseEntity<>(MessageResponse.builder().error(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
 }

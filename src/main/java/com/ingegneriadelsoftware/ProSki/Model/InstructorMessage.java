@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +24,9 @@ public class InstructorMessage {
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
+
+    @OneToMany(mappedBy = "instructorMessage")
+    List<InstructorComment> instructorComments;
 
     @Column
     private String message;

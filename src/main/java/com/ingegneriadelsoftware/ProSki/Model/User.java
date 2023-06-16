@@ -74,10 +74,19 @@ public class User implements UserDetails {
     List<VendorMessage> vendorMessages;
 
     @OneToMany(mappedBy = "user")
+    List<VendorComment> vendorComments;
+
+    @OneToMany(mappedBy = "user")
     List<LocationMessage> locationMessages;
 
     @OneToMany(mappedBy = "user")
+    List<LocationComment> locationComments;
+
+    @OneToMany(mappedBy = "user")
     List<InstructorMessage> instructorMessages;
+
+    @OneToMany(mappedBy = "user")
+    List<InstructorComment> instructorComments;
 
     @Enumerated(EnumType.STRING)
     private Role role;

@@ -1,8 +1,10 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
+import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LocationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.CardSkipassRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Service.LocationService;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
@@ -14,10 +16,7 @@ import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.DateTimeException;
 
@@ -50,11 +49,32 @@ public class LocationController {
     }
 
     @PostMapping("create/message")
-    public ResponseEntity<?> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<String> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(locationService.createMessage(request, httpRequest));
         } catch(EntityNotFoundException | IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/create/comment")
+    public ResponseEntity<?> createCommentToVendorMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
+        try {
+            return ResponseEntity.ok(locationService.createCommentToMessage(request, httpRequest));
+        } catch(EntityNotFoundException | IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/get/all/message/{id_location}")
+    public ResponseEntity<MessageResponse> gelAllMessageByLocation(@PathVariable("id_location") Integer idLocation) {
+        try{
+            return ResponseEntity.ok(locationService.getAllMessage(idLocation));
+        } catch(IllegalStateException e) {
+            return new ResponseEntity<>(MessageResponse.builder().error(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+
 }
