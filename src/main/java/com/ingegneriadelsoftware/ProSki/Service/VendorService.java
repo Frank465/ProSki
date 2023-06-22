@@ -213,8 +213,46 @@ public class VendorService {
             cur.getVendorComments().forEach(elem -> {
                 commentDTOS.add(CommentDTO.builder().id(elem.getCommentId()).user(elem.getUser().getEmail()).comment(elem.getComment()).build());
             });
-            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getEmail()).message(cur.getMessage()).comments(commentDTOS).build());
+            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
         return MessageResponse.builder().idLocation(idRifornitore).listMessage(messageDTOS).build();
+    }
+
+    /**
+     *Il metodo elimina un messaggio e a cascata tutti i commenti che ad esso si riferiscono.
+     * In questo caso si tratta di un messaggio creato da un utente sul forum di un rifornitore
+     * Il compito è riservato all'admin del sistema
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteMessage(MessageDTO request) {
+        VendorMessage message = vendorMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()->new IllegalStateException("Il messaggio cercato non esiste"));
+        vendorMessageRepository.delete(message);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .message(message.getMessage())
+                .user(message.getUser().getUserId())
+                .build();
+    }
+
+    /**
+     * Il metodo elimina una lista di commenti ritenuti in opportuni da parte dell'admin per un determinato messaggio
+     * In questo caso si tratta di uno o più commenti che degli utenti fanno sul messaggio di un utente sul forum di un rifornitore
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteComments(MessageDTO request) {
+        if(request.getComments().isEmpty()) throw new IllegalStateException("Non ci sono commenti selezionati");
+        VendorMessage message = vendorMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()-> new EntityNotFoundException("Il messaggio indicato non esiste"));
+        List<VendorComment> comments = new ArrayList<>();
+        request.getComments().forEach(cur -> comments.add(vendorCommentRepository.findById(cur.getId())
+                .orElseThrow(()-> new EntityNotFoundException("Un dei commenti indicati non esiste"))));
+        vendorCommentRepository.deleteAll(comments);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .comments(request.getComments())
+                .build();
     }
 }

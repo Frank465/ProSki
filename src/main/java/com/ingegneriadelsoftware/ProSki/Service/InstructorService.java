@@ -1,5 +1,6 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
+import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.InstructorRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
@@ -47,8 +48,8 @@ public class InstructorService {
      * @throws IllegalStateException
      */
     public String insertInstructor(InstructorRequest request) throws EntityNotFoundException{
-        Optional <Instructor> maestro = instructorRepository.findByEmail(request.getEmail());
-        if(maestro.isPresent()) throw new IllegalStateException("Il maestro è già stato inserito");
+        Optional <Instructor> instructor = instructorRepository.findByEmail(request.getEmail());
+        if(instructor.isPresent()) throw new IllegalStateException("Il maestro è già stato inserito");
         Location location = locationService.getLocalitaByName(request.getLocation());
         Instructor newInstructor = new Instructor(request.getName(), request.getSurname(), request.getEmail(), request.getSpeciality(), location);
         instructorRepository.save(newInstructor);
@@ -56,8 +57,8 @@ public class InstructorService {
     }
 
     /**
-     * Un utente può pubblicare un messaggio per un determinato maestro solo se si è iscritto almeno una volta ad una sua lezione
-     * Implementazione avviene tramite Strategy Method
+     * Un utente può pubblicare un messaggio per un determinato maestro solo se si è iscritto almeno una volta
+     * ad una sua lezione. Implementazione avviene tramite Strategy Method
      * @param request
      * @param httpServletRequest
      * @return
@@ -130,8 +131,46 @@ public class InstructorService {
             cur.getInstructorComments().forEach(elem -> {
                 commentDTOS.add(CommentDTO.builder().id(elem.getCommentId()).user(elem.getUser().getEmail()).comment(elem.getComment()).build());
             } );
-            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getEmail()).message(cur.getMessage()).comments(commentDTOS).build());
+            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
         return MessageResponse.builder().idLocation(idMaestro).listMessage(messageDTOS).build();
+    }
+
+    /**
+     *Il metodo elimina un messaggio e a cascata tutti i commenti che ad esso si riferiscono.
+     * In questo caso si tratta di un messaggio creato da un utente sul forum di un maestro
+     * Il compito è riservato all'admin del sistema
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteMessage(MessageDTO request) {
+        InstructorMessage message = instructorMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()->new EntityNotFoundException("Il messaggio cercato non esiste"));
+        instructorMessageRepository.delete(message);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .message(message.getMessage())
+                .user(message.getUser().getUserId())
+                .build();
+    }
+
+    /**
+     * Il metodo elimina una lista di commenti ritenuti in opportuni da parte dell'admin per un determinato messaggio
+     * In questo caso si tratta di uno o più commenti che degli utenti fanno sul messaggio di un utente sul forum di un maestro
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteComments(MessageDTO request) {
+        if(request.getComments().isEmpty()) throw new IllegalStateException("Non ci sono commenti selezionati");
+        InstructorMessage message = instructorMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()-> new EntityNotFoundException("Il messaggio indicato non esiste"));
+        List<InstructorComment> comments = new ArrayList<>();
+        request.getComments().forEach(cur -> comments.add(instructorCommentRepository.findById(cur.getId())
+                .orElseThrow(()-> new EntityNotFoundException("Un dei commenti indicati non esiste"))));
+        instructorCommentRepository.deleteAll(comments);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .comments(request.getComments())
+                .build();
     }
 }

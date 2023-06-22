@@ -3,6 +3,7 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.EquipmentAvailableResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
 import com.ingegneriadelsoftware.ProSki.Service.VendorService;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,7 +25,7 @@ public class VendorController {
     private final VendorService vendorService;
 
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> createVendor(@Valid @RequestBody VendorRequest request) {
         try{
@@ -34,7 +35,7 @@ public class VendorController {
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/insert/equipment")
     public ResponseEntity<?> updateVendorEquipment(@Valid @RequestBody VendorEquipmentRequest request) {
         try {
@@ -83,7 +84,25 @@ public class VendorController {
         } catch(IllegalStateException e) {
             return new ResponseEntity<>(MessageResponse.builder().error(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }
-
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/delete/message")
+    public ResponseEntity<?> deleteMessageByVendor(@RequestBody MessageDTO request) {
+        try {
+            return ResponseEntity.ok(vendorService.deleteMessage(request));
+        }catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("delete/comments")
+    public ResponseEntity<?> deleteMessagesByVendor(@RequestBody MessageDTO request) {
+        try {
+            return ResponseEntity.ok(vendorService.deleteComments(request));
+        }catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -4,6 +4,8 @@ import com.ingegneriadelsoftware.ProSki.DTO.Request.CardSkipassRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LocationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.LocationResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.CommentDTO;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
@@ -23,6 +25,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +56,7 @@ public class LocationService {
      * @return
      * @throws DateTimeException
      */
-    public String createLocation(LocationRequest request) throws DateTimeException {
+    public Location createLocation(LocationRequest request) throws DateTimeException {
         Optional<Location> location = locationRepository.findByName(request.getName());
         if(location.isPresent()) throw new IllegalStateException("località gia presente");
         // Parse e controllo date inizio e fine stagione
@@ -75,7 +78,28 @@ public class LocationService {
                 closeSkilift
         );
         locationRepository.save(newLocation);
-        return "localita creata con successo";
+        return newLocation;
+    }
+
+    /**
+     * Il metodo ritorna tutte le location create dall'admin
+     * @return
+     */
+    public List<LocationResponse> getAllLocation() {
+        Iterable<Location> locations = locationRepository.findAll();
+        List<LocationResponse> lessonsResponse = new ArrayList<>();
+        for (Location location : locations) {
+            lessonsResponse.add(LocationResponse.builder()
+                    .locationId(location.getLocationId())
+                    .name(location.getName())
+                    .startOfSeason(location.getStartOfSeason())
+                    .endOfSeason(location.getEndOfSeason())
+                    .priceSubscription(location.getPriceSubscription())
+                    .openingSkiLift(location.getOpeningSkiLift())
+                    .closingSkiLift(location.getClosingSkiLift())
+                    .build());
+        }
+        return lessonsResponse;
     }
 
     /**
@@ -162,8 +186,46 @@ public class LocationService {
             cur.getLocationComments().forEach(elem -> {
                 commentDTOS.add(CommentDTO.builder().id(elem.getCommentId()).user(elem.getUser().getEmail()).comment(elem.getComment()).build());
             } );
-            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getEmail()).message(cur.getMessage()).comments(commentDTOS).build());
+            messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
         return MessageResponse.builder().idLocation(idLocation).listMessage(messageDTOS).build();
+    }
+
+    /**
+     *Il metodo elimina un messaggio e a cascata tutti i commenti che ad esso si riferiscono.
+     * In questo caso si tratta di un messaggio creato da un utente sul forum di una località
+     * Il compito è riservato all'admin del sistema
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteMessage(MessageDTO request) {
+        LocationMessage message = locationMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()->new IllegalStateException("Il messaggio cercato non esiste"));
+        locationMessageRepository.delete(message);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .message(message.getMessage())
+                .user(message.getUser().getUserId())
+                .build();
+    }
+
+    /**
+     * Il metodo elimina una lista di commenti ritenuti in opportuni da parte dell'admin per un determinato messaggio
+     * In questo caso si tratta di uno o più commenti che degli utenti fanno sul messaggio di un utente sul forum di una località
+     * @param request
+     * @return
+     */
+    public MessageDTO deleteComments(MessageDTO request) {
+        if(request.getComments().isEmpty()) throw new IllegalStateException("Non ci sono commenti selezionati");
+        LocationMessage message = locationMessageRepository.findById(request.getIdMessage())
+                .orElseThrow(()-> new EntityNotFoundException("Il messaggio indicato non esiste"));
+        List<LocationComment> comments = new ArrayList<>();
+        request.getComments().forEach(cur -> comments.add(locationCommentRepository.findById(cur.getId())
+                .orElseThrow(()-> new EntityNotFoundException("Un dei commenti indicati non esiste"))));
+        locationCommentRepository.deleteAll(comments);
+        return MessageDTO.builder()
+                .idMessage(message.getMessageId())
+                .comments(request.getComments())
+                .build();
     }
 }

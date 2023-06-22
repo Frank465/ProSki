@@ -2,11 +2,12 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 
 import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.BuySkipassRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.ReservationRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.UserPlanRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.BuySkipassResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.ReservationResponse;
 import com.ingegneriadelsoftware.ProSki.Model.Lesson;
-import com.ingegneriadelsoftware.ProSki.Service.LessonService;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,11 +30,16 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/lezioni")
-    public ResponseEntity<?> getAllLessonsByUtente(HttpServletRequest servletRequest) {
+    /**
+     * Il metodo ritorna tutte le lezioni a cui l'utente(loggato) si è iscritto
+     * @param servletRequest
+     * @return
+     */
+    @GetMapping("/getAll/lessons")
+    public ResponseEntity<?> getAllLessonsByUser(HttpServletRequest servletRequest) {
         List<LessonResponse> lessonsResponse = new ArrayList<>();
         try{
-            List<Lesson> lessons = userService.getLezioniByUtente(servletRequest);
+            List<Lesson> lessons = userService.getLessonsByUser(servletRequest);
             lessons.forEach(cur-> {
                 lessonsResponse.add(DTOManager.toLessonResponseByLesson(cur));
             });
@@ -51,9 +58,9 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
-    @PostMapping("/insert/user/plan")
-    public ResponseEntity<String> enterUserPlan(@Valid @RequestBody UserPlanRequest request, HttpServletRequest httpRequest) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/insert/plan")
+    public ResponseEntity<String> enterUserPlan(@Valid @RequestBody UserPlanRequest request) {
         try {
             return ResponseEntity.ok(userService.insertUserPlan(request));
         } catch (IllegalStateException e) {
@@ -71,7 +78,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/getAllUsers/byGender/{gender}")
     public ResponseEntity<?> getUsersByGender(@PathVariable String gender) {
         try {
@@ -81,7 +88,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/getAllUsers/byAge")
     public ResponseEntity<?> getUsersByAge(@PathParam("startAge") Integer startAge, @PathParam("endAge") Integer endAge) {
         try{
@@ -91,13 +98,29 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/delete/user/{email}")
     public ResponseEntity<String> deleteUtente(@PathVariable("email") String email) {
         try{
             return ResponseEntity.ok(userService.deleteUserByEmail(email));
         }catch(IllegalStateException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Il metodo permette di creare prenotazioni da parte di un utente su un rifornitore
+     * @param request
+     * @param servletRequest
+     * @return
+     */
+    @PostMapping("/reservation/create")
+    public ResponseEntity<?> createReservation(@Valid @RequestBody ReservationRequest request, HttpServletRequest servletRequest) {
+        try{
+            ReservationResponse reservationResponse = DTOManager.toReservationResponseByReservation(userService.createReservation(request, servletRequest));
+            return ResponseEntity.ok(reservationResponse);
+        }catch(IllegalStateException | DateTimeException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

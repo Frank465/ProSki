@@ -1,5 +1,8 @@
 package com.ingegneriadelsoftware.ProSki.Security;
 
+import com.ingegneriadelsoftware.ProSki.Model.User;
+import com.ingegneriadelsoftware.ProSki.Service.UserService;
+import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -109,5 +112,15 @@ public class JwtUtils {
         //Nel header il token si trova nella posizione dopo la 7
         String jwt = authHeader.substring(7);
         return exctractUsername(jwt);
+    }
+
+    public void invalidToken(HttpServletRequest request, UserService userService) {
+        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
+        String authHeader = request.getHeader("Authorization");
+        //Nel header il token si trova nella posizione dopo la 7
+        String jwt = authHeader.substring(7);
+        String username = exctractUsername(jwt);
+        User user = (User) userService.loadUserByUsername(username);
+        user.setAccountExpired(true);
     }
 }

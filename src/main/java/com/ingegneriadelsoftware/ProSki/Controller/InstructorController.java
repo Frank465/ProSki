@@ -1,9 +1,11 @@
 package com.ingegneriadelsoftware.ProSki.Controller;
 
+import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.InstructorRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
 import com.ingegneriadelsoftware.ProSki.Service.InstructorService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
+
+
 @RestController
 @RequestMapping("/api/v1/instructor")
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ public class InstructorController {
 
     private final InstructorService instructorService;
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("create")
     public ResponseEntity<String> createInstructor(@Valid @RequestBody InstructorRequest request) {
         try {
@@ -33,7 +37,7 @@ public class InstructorController {
     }
 
     @PostMapping("create/message")
-    public ResponseEntity<?> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> createMessageToInstructor(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(instructorService.createMessage(request, httpRequest));
         } catch(EntityNotFoundException e) {
@@ -42,7 +46,7 @@ public class InstructorController {
     }
 
     @PostMapping("/create/comment")
-    public ResponseEntity<?> createCommentToVendorMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> createCommentToInstructorMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(instructorService.createCommentToMessage(request, httpRequest));
         } catch(EntityNotFoundException | IllegalStateException e) {
@@ -52,7 +56,7 @@ public class InstructorController {
 
 
     @GetMapping("/get/all/message/{id_instructor}")
-    public ResponseEntity<MessageResponse> gelAllMessageByLocation(@PathVariable("id_instructor") Integer idLocation) {
+    public ResponseEntity<MessageResponse> gelAllMessageByInstructor(@PathVariable("id_instructor") Integer idLocation) {
         try{
             return ResponseEntity.ok(instructorService.getAllMessage(idLocation));
         } catch(IllegalStateException e) {
@@ -60,5 +64,23 @@ public class InstructorController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/delete/message")
+    public ResponseEntity<?> deleteMessageByInstructor(@RequestBody MessageDTO request) {
+        try {
+            return ResponseEntity.ok(instructorService.deleteMessage(request));
+        }catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("delete/comments")
+    public ResponseEntity<?> deleteMessagesByInstructor(@RequestBody MessageDTO request) {
+        try {
+            return ResponseEntity.ok(instructorService.deleteComments(request));
+        }catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

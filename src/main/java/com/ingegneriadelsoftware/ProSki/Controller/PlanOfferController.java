@@ -5,8 +5,7 @@ import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.OfferRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.PlanRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.OfferResponse;
-import com.ingegneriadelsoftware.ProSki.Service.OfferService;
-import com.ingegneriadelsoftware.ProSki.Service.PlanService;
+import com.ingegneriadelsoftware.ProSki.Service.PlaneOfferService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,24 +22,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PlanOfferController {
 
-    private final PlanService planService;
-    private final OfferService offerService;
+    private final PlaneOfferService planeOfferService;
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/create/plan")
     public ResponseEntity<String> createPlan(@Valid @RequestBody PlanRequest request) {
         try{
-            return ResponseEntity.ok(planService.createPlan(request.getPlanName()));
+            return ResponseEntity.ok(planeOfferService.createPlan(request.getPlanName()));
         } catch (IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/create/offer")
     public ResponseEntity<OfferResponse> createOffer(@Valid @RequestBody OfferRequest request) {
         try{
-            return ResponseEntity.ok(DTOManager.toOfferResponseByOffer(offerService.createOffer(request)));
+            return ResponseEntity.ok(DTOManager.toOfferResponseByOffer(planeOfferService.createOffer(request)));
         } catch(IllegalStateException ex) {
             return new ResponseEntity<>(OfferResponse.builder().message(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }

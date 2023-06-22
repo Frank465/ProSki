@@ -30,7 +30,4 @@ public class Plan {
         this.name = name;
     }
 
-    public void setUserPlan(User user) {
-        users.add(user);
-    }
 }

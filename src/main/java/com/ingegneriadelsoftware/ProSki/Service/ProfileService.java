@@ -11,6 +11,8 @@ import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
 import com.ingegneriadelsoftware.ProSki.Security.JwtUtils;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,7 +76,7 @@ public class ProfileService {
      * Conferma la registrazione di un utente dopo che ha verificato tramite email, se il token è scaduto l'utente viene eliminato
      * @return String
      */
-    public void confirmToken(String token) throws IllegalStateException {
+    public String confirmToken(String token) throws IllegalStateException {
         User user = userRepository.findByToken(token).orElseThrow(()->new IllegalStateException("Utente non esiste"));
         if(user.isEnable()) throw new IllegalStateException("l'utente è gia registrato");
         try{
@@ -85,20 +87,31 @@ public class ProfileService {
         }
         //L'utente viene registrato al sito
         userRepository.enableUser(user.getEmail());
+        return "Confirm";
     }
 
     /**
-     * Login di un utente attraverso jwt
+     * Login di un utente attraverso jwt.
+     * Vengono passate le credenziali da parte di un utente, queste attraverso authenticationManager di Spring Security
+     * vengono controllare verificando che l'utente sia registrato correttamente.
+     * Poi viene generato il token passandogli l'utente trovato nel ContextSecurity e la durata del token (1 giorno)
+     * Infine viene create la risposta che è formata dal token(stringa)
      * @param request
      */
-    public AuthenticationResponse authentication(AuthenticationRequest request) throws AuthenticationException {
+    public AuthenticationResponse authentication(AuthenticationRequest request) {
         UserDetails user;
+        Authentication auth;
         //Controlla se l'utente con queste credenziali esiste nel SecurityContext
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+        }catch(AuthenticationException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
         //Prende le credenziali dell'utente che sta facendo l'autenticazione
         user = (UserDetails) auth.getPrincipal();
+
         //Genera il token associato all'utente con una durata di 24 ore
         String jwtToken = jwtUtils.generateToken(
                 user,

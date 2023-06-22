@@ -2,17 +2,15 @@ package com.ingegneriadelsoftware.ProSki.DTO.Request;
 
 
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
-@Getter
+@Data
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
@@ -28,16 +26,17 @@ public class  RegisterRequest {
 
     @NotNull
     @NotEmpty
+    @Pattern(regexp = Utils.REGEX_PASSWORD, message = Utils.ERROR_PASSWORD)
     private String password;
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = Utils.REGEX_EMAIL, message = Utils.ERROR_EMAIL)
+    @Email(regexp = Utils.REGEX_EMAIL, message = Utils.ERROR_EMAIL)
     private String email;
 
     @NotNull
     @NotEmpty
-    @Pattern(regexp = Utils.SESSO, message = "Il campo sesso deve contenere la parola uomo oppure donna")
+    @Pattern(regexp = Utils.SESSO, message = "Bisogna scrivere man o women")
     private String gender;
 
     @NotNull

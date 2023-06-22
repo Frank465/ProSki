@@ -1,10 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -14,6 +11,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 public class Lesson {
     @Id

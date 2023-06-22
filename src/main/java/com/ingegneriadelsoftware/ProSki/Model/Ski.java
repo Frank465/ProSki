@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Ski {
+public class Ski extends Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

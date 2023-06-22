@@ -25,7 +25,7 @@ public class VendorMessage {
     @JoinColumn(name = "id_user")
     private User user;
 
-    @OneToMany(mappedBy = "vendorMessage")
+    @OneToMany(mappedBy = "vendorMessage", cascade = CascadeType.ALL)
     List<VendorComment> vendorComments;
 
     @Column

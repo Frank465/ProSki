@@ -20,7 +20,7 @@ public class LessonController {
 
     private final LessonService lessonService;
 
-    @PreAuthorize("hasRole('RUOLO_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> createLesson(@Valid @RequestBody LessonRequest request) {
         try{
@@ -36,6 +36,24 @@ public class LessonController {
             return ResponseEntity.ok(lessonService.getListLessons());
         }catch(EntityNotFoundException ex) {
             return new ResponseEntity<>("Non ci sono lezioni disponibili", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getAll/byInstructor/{id_instructor}")
+    public ResponseEntity<?> getLessonsByInstructor(@PathVariable("id_instructor") Integer idInstructor) {
+        try{
+            return ResponseEntity.ok(lessonService.getListLessonsByInstructor(idInstructor));
+        }catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getAll/byLocation/{id_location}")
+    public ResponseEntity<?> getLessonsByLocation(@PathVariable("id_location") Integer idLocation) {
+        try{
+            return ResponseEntity.ok(lessonService.getListLessonsByLocation(idLocation));
+        }catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

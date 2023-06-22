@@ -8,6 +8,7 @@ import com.ingegneriadelsoftware.ProSki.Model.Offer;
 import com.ingegneriadelsoftware.ProSki.Model.Plan;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Repository.OfferRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.PlanRepository;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,22 +16,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * La classe contiene tutti i metodi necessari per gestire le offerte
+ * La classe contiene tutti i metodi necessari per gestire i piani e le offerte
  */
 @Service
 @RequiredArgsConstructor
-public class OfferService {
+public class PlaneOfferService {
 
     private final OfferRepository offerRepository;
-    private final PlanService planService;
     private final EmailSender emailSender;
-
-    public Offer getofferByName(String offer) {
-        return offerRepository.findByName(offer).orElseThrow(()-> new IllegalStateException("L'"));
-    }
-
+    private final PlanRepository planRepository;
 
     /**
      * Il metodo elimina le offerte scadute, fa il controllo dei dati inseriti se sono validi e crea delle offerte associate ad un
@@ -47,7 +44,7 @@ public class OfferService {
                 offerRepository.delete(offer);
         }
         //Controllo esistenza del piano per inserimento offerta
-        Plan plan = planService.getPlanByName(request.getPlan());
+        Plan plan = getPlanByName(request.getPlan());
         //Controllo data
         LocalDate data = Utils.formatterData(request.getDate());
         if(data.isBefore(LocalDate.now())) throw new IllegalStateException("La data inserita non è valida");
@@ -81,5 +78,22 @@ public class OfferService {
                 discount += elem.getDiscount();
         }
         return discount >= 100 ? 100 : discount;
+    }
+
+    /**
+     * Il metodo crea il piano controllando che non esista già uno identico
+     * @param name
+     * @return
+     */
+    public String createPlan(String name) {
+        Optional<Plan> piano = planRepository.findByName(name);
+        if(piano.isPresent()) throw new IllegalStateException("Il piano è già presente");
+        planRepository.save(new Plan(name));
+        return "Il piano " + name + " è stato generato correttamente";
+    }
+
+    public Plan getPlanByName(String nomePiano) {
+        return planRepository.findByName(nomePiano)
+                .orElseThrow(()-> new IllegalStateException("Il piano selezionato non è stato trovato"));
     }
 }

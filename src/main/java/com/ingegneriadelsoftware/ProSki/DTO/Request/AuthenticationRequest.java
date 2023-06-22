@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Getter
+@Data
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString

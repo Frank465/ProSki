@@ -11,6 +11,7 @@ import com.ingegneriadelsoftware.ProSki.Model.Location;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Repository.LessonRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.InstructorRepository;
+import com.ingegneriadelsoftware.ProSki.Repository.LocationRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,19 +20,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LessonService {
-    private final InstructorService instructorService;
+
     private final LessonRepository lessonRepository;
     private final EmailSender emailSend;
     private final UserRepository userRepository;
     private final InstructorRepository instructorRepository;
-    private final LocationService locationService;
+    private final LocationRepository locationRepository;
+
 
     /**
      * Viene creata una lezione a partire dalla request(DTO), le date da stringhe vengono convertite. Viene preso l'istruttore
@@ -51,7 +55,8 @@ public class LessonService {
         if(!startLesson.isAfter(LocalDateTime.now()) || endLesson.isBefore(startLesson))
             throw new IllegalStateException("Le data di inizio deve essere nel futuro e non può precedere la data di fine");
         //Verifica data lezione con le altre lezioni del maestro
-        Instructor instructor = instructorService.getInstructorByEmail(request.getInstructorEmail());
+        Instructor instructor = instructorRepository.findByEmail(request.getInstructorEmail())
+                .orElseThrow(()->new EntityNotFoundException("Il maestro non esiste"));
         List<Lesson> list = instructor.getLessonList();
         //Controllo che date inserite rientrano nei vincoli di date della localita su stagione e ora apertura impianti
         Location location = instructor.getLocation();
@@ -116,5 +121,56 @@ public class LessonService {
                     .build());
         }
         return lessonsList;
+    }
+
+    /**
+     * Il metodo ritorna tutte le lezioni di un maestro che ancora si devono svolgere.
+     * Attraverso una LessonResponse si viene a conoscenza dell'Id della lezione del maestro e dell'orario di inizio
+     * e fine lezione.
+     * @param idInstructor
+     * @return
+     */
+    public List<LessonResponse> getListLessonsByInstructor(Integer idInstructor) {
+        Instructor instructor = instructorRepository.findById(idInstructor).orElseThrow(()->new EntityNotFoundException("maestro non trovato"));
+        List<Lesson> lessonsInstructor = lessonRepository.findAllByInstructor(instructor);
+        //Seleziono tutte le lezioni che hanno una data successiva a quella odierna
+        List <Lesson> lessonAfterNow = lessonsInstructor.stream().filter(cur -> cur.getStartLesson().isAfter(LocalDateTime.now())).toList();
+        List<LessonResponse> lessonsResponse = new ArrayList<>();
+        lessonAfterNow.forEach( elem -> {
+            lessonsResponse.add(LessonResponse.builder()
+                    .idLesson(elem.getId())
+                    .instructor(elem.getInstructor().getEmail())
+                    .startLesson(elem.getStartLesson().toString())
+                    .endLesson(elem.getEndLesson().toString())
+                    .build());
+        });
+        return lessonsResponse;
+    }
+
+    /**
+     * Il metodo ritorna tutte le lezioni che avvengo in una località antecedenti al momento stesso.
+     * Viene ritornata una lista di LessonResponse in cui si evince idLesson, Maestro, inizio e fine lezione
+     * @param idLocation
+     * @return
+     */
+    public List<LessonResponse> getListLessonsByLocation(Integer idLocation) {
+        Location location = locationRepository.findById(idLocation).orElseThrow(()-> new EntityNotFoundException("La localià non esiste"));
+        List<Instructor> instructorsLocation = location.getInstructors();
+        List<LessonResponse> lessonsResponse = new ArrayList<>();
+        //Per ogni istruttore della località prendo le sue lezioni
+        instructorsLocation.forEach(elem->{
+            //Filtro le lezioni considerando solo quelle non ancora avvenute
+            List<Lesson> lessonsAfterNow = elem.getLessonList().stream().filter(cur -> cur.getStartLesson().isAfter(LocalDateTime.now())).toList();
+            //Per ogni lezione da farsi creo il DTO per la response
+            lessonsAfterNow.forEach(cur -> {
+                lessonsResponse.add(LessonResponse.builder()
+                                .idLesson(cur.getId())
+                                .instructor(cur.getInstructor().getEmail())
+                                .startLesson(cur.getStartLesson().toString())
+                                .endLesson(cur.getEndLesson().toString())
+                        .build());
+            });
+        });
+        return lessonsResponse;
     }
 }

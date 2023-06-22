@@ -25,7 +25,7 @@ public class LocationMessage {
     @JoinColumn(name = "id_user")
     private User user;
 
-    @OneToMany(mappedBy = "locationMessage")
+    @OneToMany(mappedBy = "locationMessage", cascade = CascadeType.ALL)
     List<LocationComment> locationComments;
 
     @Column

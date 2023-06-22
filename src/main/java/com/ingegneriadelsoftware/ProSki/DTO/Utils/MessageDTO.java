@@ -15,7 +15,7 @@ public class MessageDTO {
 
     private Integer idMessage;
 
-    private String user;
+    private Integer user;
 
     private String message;
 

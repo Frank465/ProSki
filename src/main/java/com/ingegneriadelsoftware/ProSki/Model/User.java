@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -53,6 +54,7 @@ public class User implements UserDetails {
 
     private boolean locked = false;
     private boolean enable = false;
+    private boolean accountExpired = false;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -113,7 +115,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return Collections.singleton(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
@@ -123,7 +125,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return !accountExpired;
     }
 
     @Override
@@ -140,4 +142,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return enable;
     }
+
 }

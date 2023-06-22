@@ -1,6 +1,7 @@
 package com.ingegneriadelsoftware.ProSki.DTO;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Response.*;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -80,4 +81,17 @@ public class DTOManager {
                 .date(buySkipass.getDate().toString())
                 .build();
     }
+
+    public static LocationResponse toLocationResponseByLocation(Location location) {
+        return LocationResponse.builder()
+                    .locationId(location.getLocationId())
+                    .name(location.getName())
+                    .priceSubscription(location.getPriceSubscription())
+                    .startOfSeason(location.getStartOfSeason())
+                    .endOfSeason(location.getEndOfSeason())
+                    .openingSkiLift(location.getOpeningSkiLift())
+                    .closingSkiLift(location.getClosingSkiLift())
+                    .build();
+    }
+
 }

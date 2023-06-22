@@ -13,7 +13,5 @@ import java.util.List;
 @Repository
 public interface ReservationRepository extends CrudRepository<Reservation, Integer> {
 
-    List<Reservation> findAllByUser(User user);
-
     List<Reservation> findAllByVendor(Vendor vendor);
 }
