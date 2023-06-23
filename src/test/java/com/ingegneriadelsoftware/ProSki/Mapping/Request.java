@@ -1,16 +1,30 @@
 package com.ingegneriadelsoftware.ProSki.Mapping;
 
-import com.ingegneriadelsoftware.ProSki.DTO.Request.AuthenticationRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.RegisterRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.UserPlanRequest;
-import com.ingegneriadelsoftware.ProSki.Model.Plan;
-import com.ingegneriadelsoftware.ProSki.Model.User;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
+import com.ingegneriadelsoftware.ProSki.Model.*;
+import com.ingegneriadelsoftware.ProSki.Stub;
+import com.ingegneriadelsoftware.ProSki.Utils.Utils;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
 public class Request {
+
+    public static InstructorRequest instructorRequestMapper(Instructor instructor) {
+        InstructorRequest instructorRequest = new InstructorRequest();
+        instructorRequest.setEmail(instructor.getEmail());
+        instructorRequest.setSpeciality(instructor.getSpeciality());
+        instructorRequest.setLocation(instructor.getLocation().getName());
+        instructorRequest.setName(instructor.getName());
+        instructorRequest.setSurname(instructor.getSurname());
+        return instructorRequest;
+    }
 
     public static RegisterRequest registerRequestMapper(User user) {
         RegisterRequest request = new RegisterRequest();
@@ -28,5 +42,22 @@ public class Request {
         request.setEmail(user.getEmail());
         request.setPassword(user.getPassword());
         return request;
+    }
+
+    public static BuySkipassRequest buySkipassRequestMapper(BuySkipass buySkipass) {
+        BuySkipassRequest buySkipassRequest = new BuySkipassRequest();
+        buySkipassRequest.setDate("12/12/2024");
+        buySkipassRequest.setCardCode(buySkipass.getCardSkipass().getCardCode());
+        return buySkipassRequest;
+    }
+
+    public static ReservationRequest reservationRequestMapper(Reservation reservation) {
+        ReservationRequest reservationRequest = new ReservationRequest();
+        reservationRequest.setVendorEmail("vendor1@gmail.com");
+        reservationRequest.setStartDate("19/04/2024");
+        reservationRequest.setEndDate("19/04/2024");
+        reservationRequest.setSkisList(Stub.getSkiDTOListStub());
+        reservationRequest.setSnowboardsList(Stub.getSnowboardDTOListStub());
+        return reservationRequest;
     }
 }

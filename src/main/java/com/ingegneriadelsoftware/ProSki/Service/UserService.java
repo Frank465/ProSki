@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -189,7 +190,6 @@ public class UserService implements UserDetailsService {
     public Reservation createReservation(ReservationRequest reservationRequest, HttpServletRequest servletRequest) throws DateTimeException {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
         User user = Utils.getUserFromHeader(servletRequest, userRepository, jwtUtils);
-        System.out.println(user.getUserId());
         //Conversione Date da stringa a LocalDate
         LocalDate startDateReservation = Utils.formatterData(reservationRequest.getStartDate());
         LocalDate endDateReservation = Utils.formatterData(reservationRequest.getEndDate());
@@ -214,12 +214,16 @@ public class UserService implements UserDetailsService {
         //Come sopra solo che con gli sci
         List<Integer> listIdSky = equipmentAvailable.getSkisList().stream().map(SkiDTO::getId).collect(Collectors.toList());
         reservationRequest.getSkisList().stream().filter(cur -> attrezzaturaComune.test(cur.getId(), listIdSky)).toList();
-
+        //Converto le liste di sci e snowboard da DTO per come mi arrivano dalla request a classe concrete
+        List<Ski> skiList = new ArrayList<>();
+        reservationRequest.getSkisList().forEach(cur->skiList.add(new Ski(cur.getId(), cur.getMeasure())));
+        List<Snowboard> snowboards = new ArrayList<>();
+        reservationRequest.getSnowboardsList().forEach(cur->snowboards.add(new Snowboard(cur.getId(), cur.getMeasure())));
         Reservation newReservation = new Reservation(
                 user,
                 vendor,
-                reservationRequest.getSkisList(),
-                reservationRequest.getSnowboardsList(),
+                skiList,
+                snowboards,
                 startDateReservation,
                 endDateReservation
         );

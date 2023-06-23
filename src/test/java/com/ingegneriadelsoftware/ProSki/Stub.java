@@ -1,11 +1,20 @@
 package com.ingegneriadelsoftware.ProSki;
 
+import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LocationRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.CommentDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jdk.jshell.execution.Util;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +33,53 @@ public class Stub {
                             .build());
         }
         return lessonResponseList;
+    }
+
+    public static MessageRequest getMessageRequestStub() {
+        MessageRequest messageRequest = new MessageRequest();
+        messageRequest.setUsername("maestro1@gmail.com");
+        messageRequest.setMessage("ciao ciao");
+        return messageRequest;
+    }
+
+    public static CommentRequest getCommentRequestStub() {
+        CommentRequest commentRequest = new CommentRequest();
+        commentRequest.setIdMessage(1);
+        commentRequest.setUsername("user1@gmail.com");
+        commentRequest.setComment("ciao ciao");
+        return commentRequest;
+    }
+
+    public static List<MessageDTO> getMessageDTOListStub() {
+        List<MessageDTO> messageDTOList = new ArrayList<>();
+        for(int i = 1; i < 10; i++) {
+            MessageDTO messageDTO = new MessageDTO();
+            messageDTO.setIdMessage(i);
+            messageDTO.setUser(getUserStub().getUserId() + i);
+            messageDTO.setMessage("ciao"+ i);
+            messageDTO.setComments(getCommentDTOListStub());
+            messageDTOList.add(messageDTO);
+        }
+        return messageDTOList;
+    }
+
+    public static List<CommentDTO> getCommentDTOListStub() {
+        List<CommentDTO> commentDTOList = new ArrayList<>();
+        for(int i = 1; i < 10; i++) {
+            CommentDTO commentDTO = new CommentDTO();
+            commentDTO.setId(i);
+            commentDTO.setUser(getUserStub().getEmail().concat(""+i));
+            commentDTO.setComment("ciao" + 1);
+            commentDTOList.add(commentDTO);
+        }
+        return commentDTOList;
+    }
+
+    public static MessageResponse getMessageResponseStub() {
+        MessageResponse messageResponse = new MessageResponse();
+        messageResponse.setIdLocation(1);
+        messageResponse.setListMessage(getMessageDTOListStub());
+        return messageResponse;
     }
 
     public static LocationRequest locationDTOStub() {
@@ -74,11 +130,12 @@ public class Stub {
 
     public static Instructor getInstructorStub() {
         Instructor instructor = new Instructor();
+        instructor.setId(1);
         instructor.setEmail("maestro1@gmail.com");
         instructor.setName("maestro1");
         instructor.setSurname("_maestro1_");
         instructor.setLocation(getLocationStub());
-        instructor.setSpeciality("sci");
+        instructor.setSpeciality("ski");
         return instructor;
     }
 
@@ -98,5 +155,105 @@ public class Stub {
         plan.setPlanId(1);
         plan.setName("Giovani");
         return plan;
+    }
+
+    public static BuySkipass getBuySkipass() {
+        BuySkipass buySkipass = new BuySkipass();
+        buySkipass.setId(1);
+        buySkipass.setUser(getUserStub());
+        buySkipass.setCardSkipass(getCardSkipassStub());
+        buySkipass.setPrice(35.00);
+        buySkipass.setDate(Utils.formatterData("12/12/2024"));
+        return buySkipass;
+    }
+
+    public static CardSkipass getCardSkipassStub(){
+        CardSkipass cardSkipass = new CardSkipass();
+        cardSkipass.setId(1);
+        cardSkipass.setCardCode("cardCode1");
+        cardSkipass.setLocation(getLocationStub());
+        return cardSkipass;
+    }
+
+    public static List<User> getUserListStub() {
+        List<User> userList = new ArrayList<>();
+        for (int i = 1; i < 10; i++) {
+            User user = new User();
+            user.setUserId(i);
+            user.setSurname("_user_"+i);
+            user.setEmail(i + "useremail@email.com");
+            user.setPassword(i+"pass");
+            user.setGender(Gender.WOMAN);
+            user.setEnable(true);
+            user.setName("user"+i);
+            user.setDateBirth(Utils.formatterData("14/05/2001"));
+            userList.add(user);
+        }
+        return userList;
+    }
+
+    public static Reservation getReservationStub() {
+        Reservation reservation = new Reservation();
+        reservation.setReservationId(1);
+        reservation.setUser(getUserStub());
+        reservation.setVendor(getVendorStub());
+        reservation.setStartDate(LocalDate.now());
+        reservation.setEndDate(LocalDate.now());
+        reservation.setSnowboardReserved(getSnowboardListStub());
+        reservation.setSkiReserved(getSkiListStub());
+        return reservation;
+    }
+
+    public static Vendor getVendorStub(){
+        Vendor vendor = new Vendor();
+        vendor.setVendorId(1);
+        vendor.setEmail("vendor1@mail.com");
+        vendor.setName("vendor1");
+        vendor.setLocation(getLocationStub());
+        return vendor;
+    }
+
+    public static List<Ski> getSkiListStub() {
+        List<Ski> skis = new ArrayList<>();
+        for(int i = 1; i < 10; i++){
+            Ski ski = new Ski();
+            ski.setId(i);
+            ski.setMeasure(189 + i);
+            skis.add(ski);
+        }
+        return skis;
+    }
+
+    public static List<SkiDTO> getSkiDTOListStub() {
+        List<SkiDTO> skis = new ArrayList<>();
+        for(int i = 1; i < 10; i++){
+            SkiDTO ski = new SkiDTO();
+            ski.setId(i);
+            ski.setMeasure(189 + i);
+            skis.add(ski);
+        }
+        return skis;
+    }
+
+    public static List<Snowboard> getSnowboardListStub() {
+        List<Snowboard> snowboards = new ArrayList<>();
+        for(int i = 1; i < 10; i++){
+            Snowboard snowboard = new Snowboard();
+            snowboard.setId(i);
+            snowboard.setMeasure(189 + i);
+            snowboards.add(snowboard);
+        }
+        return snowboards;
+    }
+
+    public static List<SnowboardDTO> getSnowboardDTOListStub() {
+        List<SnowboardDTO> snowboards = new ArrayList<>();
+        for(int i = 1; i < 10; i++){
+            SnowboardDTO snowboard = new SnowboardDTO();
+            snowboard.setId(i);
+            snowboard.setMeasure(189 + i);
+            snowboards.add(snowboard);
+        }
+        return snowboards;
     }
 }

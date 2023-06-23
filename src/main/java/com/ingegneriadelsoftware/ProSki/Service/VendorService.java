@@ -59,7 +59,7 @@ public class VendorService {
     }
 
     /**
-     * Il metodo ritorna le attrezzature (sci e snowboard) disponibili per una intervallo di date
+     * Il metodo ritorna le attrezzature (sci e snowboard) disponibili di un rifornitore per un intervallo di date
      * @param IdRifornitore
      * @return
      */

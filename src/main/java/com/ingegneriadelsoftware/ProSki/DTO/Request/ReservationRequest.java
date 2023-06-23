@@ -1,15 +1,14 @@
 package com.ingegneriadelsoftware.ProSki.DTO.Request;
 
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SkiDTO;
+import com.ingegneriadelsoftware.ProSki.DTO.Utils.SnowboardDTO;
 import com.ingegneriadelsoftware.ProSki.Model.Ski;
 import com.ingegneriadelsoftware.ProSki.Model.Snowboard;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  *La classe di utilità viene utilizzata per la request poi nel DTOManager verrà mappata come una vera Prenotazione
  */
-@Getter
+@Data
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
@@ -29,10 +28,10 @@ public class ReservationRequest {
     private String vendorEmail;
 
     @NotNull
-    private List<Ski> skisList;
+    private List<SkiDTO> skisList;
 
     @NotNull
-    private List<Snowboard> snowboardsList;
+    private List<SnowboardDTO> snowboardsList;
 
     @NotNull
     @NotEmpty

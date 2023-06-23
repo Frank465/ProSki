@@ -56,7 +56,7 @@ public class InstructorController {
 
 
     @GetMapping("/get/all/message/{id_instructor}")
-    public ResponseEntity<MessageResponse> gelAllMessageByInstructor(@PathVariable("id_instructor") Integer idLocation) {
+    public ResponseEntity<MessageResponse> getAllMessageByInstructor(@PathVariable("id_instructor") Integer idLocation) {
         try{
             return ResponseEntity.ok(instructorService.getAllMessage(idLocation));
         } catch(IllegalStateException e) {
@@ -76,7 +76,7 @@ public class InstructorController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("delete/comments")
-    public ResponseEntity<?> deleteMessagesByInstructor(@RequestBody MessageDTO request) {
+    public ResponseEntity<?> deleteCommentFromMessageByInstructor(@RequestBody MessageDTO request) {
         try {
             return ResponseEntity.ok(instructorService.deleteComments(request));
         }catch (EntityNotFoundException e) {

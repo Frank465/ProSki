@@ -12,7 +12,7 @@ public class Utils {
 
     public static final String REGEX_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
     public static final String REGEX_PASSWORD = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
-    public static final String SPECIALITA = "^(?i)(sky|snowboard)$";
+    public static final String SPECIALITA = "^(?i)(ski|snowboard)$";
     public static final String SESSO = "^(?i)(man|women)$";
     public static final String LOCALDATE = "^(0[1-9]|[1-2][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$";
     public static final String LOCALDATETIME = "^(\\d{2})/(\\d{2})/(\\d{4}) (\\d{2}):(\\d{2})$";

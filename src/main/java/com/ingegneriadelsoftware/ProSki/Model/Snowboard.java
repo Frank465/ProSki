@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Snowboard extends Reservation {
+public class Snowboard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,11 @@ public class Snowboard extends Reservation {
 
     @ManyToMany(mappedBy = "snowboardReserved")
     private List<Reservation> reservation;
+
+    public Snowboard(Integer id, Integer measure) {
+        this.id = id;
+        this.measure = measure;
+    }
 
     @Override
     public String toString() {

@@ -3,12 +3,9 @@ package com.ingegneriadelsoftware.ProSki.DTO.Request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
+@Data
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
