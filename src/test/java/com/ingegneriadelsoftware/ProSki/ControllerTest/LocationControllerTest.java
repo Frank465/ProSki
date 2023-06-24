@@ -69,7 +69,6 @@ public class LocationControllerTest {
      * e ci si aspetta che lo status della risposta sia "200 OK".
      * L'annotazione @WithMockUser viene utilizzata per simulare un utente autenticato con autorità
      * di amministratore durante l'esecuzione del test.
-     *
      * @throws Exception
      */
     @Test

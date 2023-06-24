@@ -49,6 +49,14 @@ public class UserController {
         }
     }
 
+    /**
+     * L'endPoint permette ad un utente di iscriversi alle lezioni presenti passando il valore dell'id della lezione.
+     * Inoltre httpRequest serve per capire il token dell'utente che effettua l'iscrizione.
+     * Il metodo ritorna una stringa nel caso in cui la registrazione vada a buon fine.
+     * @param lessonId
+     * @param servletRequest
+     * @return
+     */
     @PostMapping("/lesson/registration/{id_lesson}")
     public ResponseEntity<String> registrationUserLesson(@PathVariable("id_lesson") Integer lessonId, HttpServletRequest servletRequest) {
         try{
@@ -58,6 +66,16 @@ public class UserController {
         }
     }
 
+
+    /**
+     * L'endPoint è riservato all'uso esclusivo dell'amministratore.
+     * Serve per inserire un utente ad un piano già esistente
+     * In ingresso riceve una request(DTO)
+     * che viene passata al service, il quale ritorna unas stringa di avvenuto inserimento
+     * Le eccezioni che vengono sollevate riguardano l'incosistenza dei dati o valori inseriti non corretti
+     * @param request
+     * @return
+     */
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/insert/plan")
     public ResponseEntity<String> enterUserPlan(@Valid @RequestBody UserPlanRequest request) {
@@ -68,6 +86,16 @@ public class UserController {
         }
     }
 
+    /**
+     * L'endpoint permette ad un utente di comprare uno skippas passando una request(DTO) che contiene le informazioni dell'acquisto
+     * inoltre è presente httpServletrequest per identificare l'utente a partire dal suo token.
+     * la request viene data l metodo che ritorna, nel caso favorevole, un BuySkippas (Entity) che viene mappato su un DTO opportuno
+     * e inserito nella risposta. Nel caso di eccezioni viene comunque creato un DTO Response nel quale è contenuto il messaggio
+     * d'errore ed inserito nella ResponseEntity
+     * @param request
+     * @param httpRequest
+     * @return
+     */
     @PostMapping("/buy/skipass")
     public ResponseEntity<BuySkipassResponse> buySkipass(@Valid @RequestBody BuySkipassRequest request, HttpServletRequest httpRequest) {
         try{
@@ -78,6 +106,12 @@ public class UserController {
         }
     }
 
+    /**
+     * L'endPoint è accessibile solo all'admin il quale può fare questa richiesta per avere tutti gli utenti iscritti
+     * al sito per gender inserito. Utile nel caso si voglia delle offerte o dei piani su questo criterio
+     * @param gender
+     * @return
+     */
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/getAllUsers/byGender/{gender}")
     public ResponseEntity<?> getUsersByGender(@PathVariable String gender) {
@@ -88,6 +122,13 @@ public class UserController {
         }
     }
 
+    /**
+     * L'endPoint è accessibile solo all'admin il quale può fare questa richiesta per avere tutti gli utenti iscritti
+     * al sito per età inserita. Utile nel caso si voglia delle offerte o dei piani su questo criterio
+     * @param startAge
+     * @param endAge
+     * @return
+     */
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/getAllUsers/byAge")
     public ResponseEntity<?> getUsersByAge(@PathParam("startAge") Integer startAge, @PathParam("endAge") Integer endAge) {
@@ -98,6 +139,11 @@ public class UserController {
         }
     }
 
+    /**
+     * L'endPoint è disponibile solo per l'admin è consente l'eliminazione di un utente a partire dalla sua mail(unica)
+     * @param email
+     * @return
+     */
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/delete/user/{email}")
     public ResponseEntity<String> deleteUtente(@PathVariable("email") String email) {

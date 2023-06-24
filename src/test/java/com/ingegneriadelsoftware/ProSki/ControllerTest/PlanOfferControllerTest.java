@@ -200,8 +200,8 @@ public class PlanOfferControllerTest {
      * Viene inoltre creato un oggetto OfferRequest a partire dallo stub utilizzando un mapper specifico.
      * Viene mockato il metodo createOffer del servizio planeOfferService per restituire l'oggetto Offer.
      * L'OfferRequest viene convertito in stringa utilizzando ObjectMapper.
-     * Viene eseguita una chiamata POST all'endpoint "/api/v1/planOffer/create/offer", includendo la stringa dell'OfferRequest come contenuto JSON.
-     * Ci si aspetta che lo status della risposta sia 403 (Forbidden)
+     * Viene eseguita una chiamata POST all'endpoint "/api/v1/planOffer/create/offer", includendo la stringa dell'OfferRequest
+     * come contenuto JSON. Ci si aspetta che lo status della risposta sia 403 (Forbidden)
      * @throws Exception
      */
     @Test

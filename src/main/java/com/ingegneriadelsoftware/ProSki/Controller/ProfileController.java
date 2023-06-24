@@ -5,12 +5,10 @@ import com.ingegneriadelsoftware.ProSki.DTO.Request.RegisterRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.AuthenticationResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.RegisterResponse;
 import com.ingegneriadelsoftware.ProSki.Service.ProfileService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
     private final ProfileService profileService;
 
+    /**
+     * L'endPoint a cui tutti hanno accesso permette la registrazione di un utente.
+     * Prende in ingresso una request(DTO) a cui vengono validati i valori (email, password, gender)
+     * La request viene passata al service che crea e ritorna un DTO RegisterResponse che viene inserito nella risposta.
+     * Il metodo solleva eccezioni nel caso di utenti già presenti oppure valori richiesti incosistenti
+     * @param request
+     * @return
+     */
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         try {

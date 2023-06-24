@@ -91,9 +91,10 @@ public class LessonService {
      */
     public boolean dataIsValid(List<Lesson> list, LocalDateTime inizio, LocalDateTime fine) {
         for(Lesson elem : list) {
-            if ((inizio.isAfter(elem.getStartLesson()) && inizio.isBefore(elem.getEndLesson()))
-                    ||(fine.isAfter(elem.getStartLesson()) && fine.isBefore(elem.getEndLesson()))
-                    ||(inizio.isEqual(elem.getStartLesson())))
+            if (inizio.isEqual(elem.getStartLesson())
+                    || inizio.isEqual(fine)
+                    || !(inizio.isBefore(elem.getStartLesson()) && fine.isBefore(elem.getStartLesson())
+                    || inizio.isAfter(elem.getEndLesson())))
                 return false;
         }
         return true;

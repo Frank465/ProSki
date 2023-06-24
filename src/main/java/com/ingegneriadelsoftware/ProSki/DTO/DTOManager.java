@@ -12,12 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Il DTOManager fa il mapping dove necessario tra le Entity ed oggetti con determinati attributi che bisogna ritornare al client
+ * Il DTOManager fa il mapping dove necessario tra le Entity ed oggetti con determinati attributi che bisogna ritornare
+ * al client. Tutti i metodi sono simili, ovvero creano delle Response a partire da entità utilizzando il pattern Builder.
+ * Il commento del primo metodo di estende a tutti gli altri, cambiano solo i dati
  */
 @Component
 @RequiredArgsConstructor
 public class DTOManager {
 
+    /**
+     * Il metodo converte una Reservation(Entity) in una ReservationResponse(DTO) così da poterla mandare al client
+     * @param reservation
+     * @return
+     */
     public static ReservationResponse toReservationResponseByReservation(Reservation reservation) {
         return ReservationResponse
                 .builder()
