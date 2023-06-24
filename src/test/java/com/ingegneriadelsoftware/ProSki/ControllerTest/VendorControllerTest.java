@@ -21,7 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,7 +29,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -58,17 +56,6 @@ public class VendorControllerTest {
     public void setup() {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(SecurityMockMvcConfigurers.springSecurity()).build();
     }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/create")
-    public ResponseEntity<?> createVendor(@Valid @RequestBody VendorRequest request) {
-        try{
-            return ResponseEntity.ok(vendorService.insertVendor(request));
-        }catch(IllegalStateException | EntityNotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
 
     /**
      * Questo test verifica che l'endpoint per la creazione di un fornitore restituisca lo stato "OK" (200)

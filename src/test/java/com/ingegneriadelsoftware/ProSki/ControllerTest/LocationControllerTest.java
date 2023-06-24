@@ -1,4 +1,4 @@
-package com.ingegneriadelsoftware.ProSki.Controller;
+package com.ingegneriadelsoftware.ProSki.ControllerTest;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;

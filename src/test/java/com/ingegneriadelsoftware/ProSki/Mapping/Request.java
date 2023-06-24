@@ -16,6 +16,14 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class Request {
 
+    public static LessonRequest toLessonRequestByLessonMapper(Lesson lesson) {
+        LessonRequest lessonRequest = new LessonRequest();
+        lessonRequest.setInstructorEmail(lesson.getInstructor().getEmail());
+        lessonRequest.setStartLesson("12/12/2024 12:00");
+        lessonRequest.setEndLesson("12/12/2024 13:00");
+        return lessonRequest;
+    }
+
     public static VendorRequest toVendorRequestByVendorMapper(Vendor vendor) {
         VendorRequest vendorRequest = new VendorRequest();
         vendorRequest.setEmail(vendor.getEmail());
