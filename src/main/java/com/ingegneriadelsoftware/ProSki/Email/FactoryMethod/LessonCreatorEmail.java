@@ -1,4 +1,4 @@
-package com.ingegneriadelsoftware.ProSki.EmailFactory;
+package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
 import lombok.RequiredArgsConstructor;
 

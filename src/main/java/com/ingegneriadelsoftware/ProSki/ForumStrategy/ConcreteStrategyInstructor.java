@@ -35,10 +35,10 @@ public class ConcreteStrategyInstructor implements PublishingStrategy{
     }
 
     @Override
-    public String publishComment(Integer idInstructorMessenge, User user, String message) {
+    public String publishingComment(Integer idInstructorMessenge, User user, String comment) {
         Optional<InstructorMessage> instructorMessage = instructorMessageRepository.findById(idInstructorMessenge);
-        InstructorComment instructorComment = new InstructorComment(user, instructorMessage.get(), message);
+        InstructorComment instructorComment = new InstructorComment(user, instructorMessage.get(), comment);
         instructorCommentRepository.save(instructorComment);
-        return message;
+        return comment;
     }
 }

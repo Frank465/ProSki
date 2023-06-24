@@ -16,6 +16,30 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class Request {
 
+    public static VendorRequest toVendorRequestByVendorMapper(Vendor vendor) {
+        VendorRequest vendorRequest = new VendorRequest();
+        vendorRequest.setEmail(vendor.getEmail());
+        vendorRequest.setLocation(vendor.getLocation().getName());
+        vendorRequest.setName(vendor.getName());
+        return vendorRequest;
+    }
+
+    public static CardSkipassRequest toCardSkipassrequestByCardSkipassMapper(CardSkipass cardSkipass) {
+        CardSkipassRequest cardSkipassRequest = new CardSkipassRequest();
+        cardSkipassRequest.setCardCode(cardSkipass.getCardCode());
+        cardSkipassRequest.setLocation(cardSkipass.getLocation().getName());
+        return cardSkipassRequest;
+    }
+
+    public static OfferRequest toOfferByOfferRequestMapper(Offer offer) {
+        OfferRequest offerRequest = new OfferRequest();
+        offerRequest.setName(offer.getName());
+        offerRequest.setPlan(offer.getPlan().getName());
+        offerRequest.setDiscount(offer.getDiscount());
+        offerRequest.setDate("12/12/2024");
+        return offerRequest;
+    }
+
     public static InstructorRequest instructorRequestMapper(Instructor instructor) {
         InstructorRequest instructorRequest = new InstructorRequest();
         instructorRequest.setEmail(instructor.getEmail());

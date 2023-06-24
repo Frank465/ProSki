@@ -17,6 +17,6 @@ public class Context {
     }
 
     public String executeCommentStrategy(Integer idMessege, User user, String comment) {
-        return publishingStrategy.publishComment(idMessege, user, comment);
+        return publishingStrategy.publishingComment(idMessege, user, comment);
     }
 }

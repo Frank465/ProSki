@@ -1,11 +1,13 @@
-package com.ingegneriadelsoftware.ProSki.EmailFactory;
+package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class BuildOfferEmail implements BuildEmail{
+public class BuildLessonEmail implements BuildEmail {
+    private final String InstructorName;
     private final String userName;
-    private final String date;
+    private final String speciality;
+
 
     public String render() {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
@@ -63,8 +65,7 @@ public class BuildOfferEmail implements BuildEmail{
                 "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
                 "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
                 "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + userName + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> A new offer has been posted for the day" + date + "\n" +
-                "\n \n" +
+                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + userName + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> A new "+ speciality +"lesson with the instructor" + InstructorName +" has been published\n" +
                 "   </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"><p>See you soon</p>" +
                 "        \n" +
                 "      </td>\n" +

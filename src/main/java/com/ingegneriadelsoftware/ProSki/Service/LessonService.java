@@ -2,9 +2,9 @@ package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LessonRequest;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.CreatorEmail;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.EmailSender;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.LessonCreatorEmail;
+import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.CreatorEmail;
+import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
+import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.LessonCreatorEmail;
 import com.ingegneriadelsoftware.ProSki.Model.Lesson;
 import com.ingegneriadelsoftware.ProSki.Model.Instructor;
 import com.ingegneriadelsoftware.ProSki.Model.Location;
@@ -20,11 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

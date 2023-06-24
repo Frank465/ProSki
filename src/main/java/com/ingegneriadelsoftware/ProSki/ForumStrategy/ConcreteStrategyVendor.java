@@ -39,7 +39,7 @@ public class ConcreteStrategyVendor implements PublishingStrategy{
     }
 
     @Override
-    public String publishComment(Integer idVendorMessenge, User user, String message) {
+    public String publishingComment(Integer idVendorMessenge, User user, String message) {
         Optional<VendorMessage> vendorMessage = vendorMessageRepository.findById(idVendorMessenge);
         VendorComment vendorComment = new VendorComment(user, vendorMessage.get(), message);
         vendorCommentRepository.save(vendorComment);

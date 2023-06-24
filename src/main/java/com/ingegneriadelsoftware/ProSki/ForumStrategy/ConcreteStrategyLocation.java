@@ -34,7 +34,7 @@ public class ConcreteStrategyLocation implements PublishingStrategy{
     }
 
     @Override
-    public String publishComment(Integer idLocationMessenger, User user, String message) {
+    public String publishingComment(Integer idLocationMessenger, User user, String message) {
         Optional<LocationMessage> vendorMessage = locationMessageRepository.findById(idLocationMessenger);
         LocationComment locationComment = new LocationComment(user, vendorMessage.get(), message);
         locationCommentRepository.save(locationComment);

@@ -1,5 +1,6 @@
-package com.ingegneriadelsoftware.ProSki.EmailFactory;
+package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
+import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.BuildEmail;
 import org.springframework.stereotype.Component;
 
 

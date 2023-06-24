@@ -56,7 +56,7 @@ public class LocationController {
     public ResponseEntity<String> createSkipass(@Valid @RequestBody CardSkipassRequest request) {
         try {
             return ResponseEntity.ok(locationService.createSkipass(request));
-        }catch (IllegalStateException | EntityNotFoundException e) {
+        }catch (IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -65,16 +65,16 @@ public class LocationController {
     public ResponseEntity<String> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(locationService.createMessage(request, httpRequest));
-        } catch(EntityNotFoundException | IllegalStateException e) {
+        } catch(IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/create/comment")
-    public ResponseEntity<?> createCommentToVendorMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> createCommentToLocationMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(locationService.createCommentToMessage(request, httpRequest));
-        } catch(EntityNotFoundException | IllegalStateException e) {
+        } catch(IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

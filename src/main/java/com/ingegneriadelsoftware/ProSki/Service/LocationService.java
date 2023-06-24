@@ -107,7 +107,7 @@ public class LocationService {
      * @param request
      * @return
      */
-    public String createSkipass(CardSkipassRequest request) throws EntityNotFoundException {
+    public String createSkipass(CardSkipassRequest request) {
          Optional<CardSkipass> skipass = cardSkipassRepository.findByCardCode(request.getCardCode());
          if(skipass.isPresent()) throw new IllegalStateException("La tessera è già presente");
          Location location = getLocalitaByName(request.getLocation());

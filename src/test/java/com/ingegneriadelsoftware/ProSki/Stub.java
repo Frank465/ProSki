@@ -1,9 +1,8 @@
 package com.ingegneriadelsoftware.ProSki;
 
-import com.ingegneriadelsoftware.ProSki.DTO.Request.CommentRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.LocationRequest;
-import com.ingegneriadelsoftware.ProSki.DTO.Request.MessageRequest;
+import com.ingegneriadelsoftware.ProSki.DTO.Request.*;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
+import com.ingegneriadelsoftware.ProSki.DTO.Response.LocationResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.MessageResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.CommentDTO;
 import com.ingegneriadelsoftware.ProSki.DTO.Utils.MessageDTO;
@@ -14,11 +13,55 @@ import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import jdk.jshell.execution.Util;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Stub {
+
+    public static VendorEquipmentRequest getVendorEquipmentRequestStub() {
+        VendorEquipmentRequest vendorEquipmentRequest = new VendorEquipmentRequest();
+        vendorEquipmentRequest.setVendorEmail(getVendorStub().getEmail());
+        vendorEquipmentRequest.setSki(getSkiListStub());
+        vendorEquipmentRequest.setSnowboards(getSnowboardListStub());
+        return vendorEquipmentRequest;
+    }
+
+    public static EquipementVendorAvailable getEquipementVendorAvailableStub() {
+        EquipementVendorAvailable equipementVendorAvailable = new EquipementVendorAvailable();
+        equipementVendorAvailable.setVendorEmail(getVendorStub().getEmail());
+        equipementVendorAvailable.setStartDate("12/12/2024");
+        equipementVendorAvailable.setEndDate("12/12/2024");
+        return equipementVendorAvailable;
+    }
+
+    public static Offer getOfferStub() {
+        Offer offer = new Offer();
+        offer.setIdOffer(1);
+        offer.setName("offer1");
+        offer.setDate(LocalDate.now());
+        offer.setDiscount(23);
+        offer.setPlan(getPlanStub());
+        return offer;
+    }
+
+    public static List<Location> getLocationListStub() {
+        List<Location> locationResponses = new ArrayList<>();
+        for(int i = 1; i < 10; i++) {
+            Location location = new Location();
+            location.setLocationId(i);
+            location.setName("location"+ i);
+            location.setPriceSubscription(35.00);
+            location.setStartOfSeason(LocalDate.now());
+            location.setEndOfSeason(LocalDate.now());
+            location.setOpeningSkiLift(LocalTime.now());
+            location.setClosingSkiLift(LocalTime.now());
+            locationResponses.add(location);
+        }
+        return locationResponses;
+    }
 
     public static List<Lesson> getAllLessonsStub() {
         List<Lesson> lessonResponseList = new ArrayList<>();
@@ -141,6 +184,7 @@ public class Stub {
 
     public static Location getLocationStub() {
         Location location = new Location();
+        location.setLocationId(1);
         location.setName("location1");
         location.setPriceSubscription(35.00);
         location.setStartOfSeason(Utils.formatterData("12/12/2023"));

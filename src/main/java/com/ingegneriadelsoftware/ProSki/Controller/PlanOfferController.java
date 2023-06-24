@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/v1/planoffer")
+@RequestMapping("/api/v1/planOffer")
 @RequiredArgsConstructor
 public class PlanOfferController {
 

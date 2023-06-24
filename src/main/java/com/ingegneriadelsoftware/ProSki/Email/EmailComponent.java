@@ -1,4 +1,4 @@
-package com.ingegneriadelsoftware.ProSki.EmailFactory;
+package com.ingegneriadelsoftware.ProSki.Email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

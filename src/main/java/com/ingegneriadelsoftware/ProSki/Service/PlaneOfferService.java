@@ -1,9 +1,9 @@
 package com.ingegneriadelsoftware.ProSki.Service;
 
 import com.ingegneriadelsoftware.ProSki.DTO.Request.OfferRequest;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.CreatorEmail;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.EmailSender;
-import com.ingegneriadelsoftware.ProSki.EmailFactory.OfferCreatorEmail;
+import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.CreatorEmail;
+import com.ingegneriadelsoftware.ProSki.Email.EmailSender;
+import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.OfferCreatorEmail;
 import com.ingegneriadelsoftware.ProSki.Model.Offer;
 import com.ingegneriadelsoftware.ProSki.Model.Plan;
 import com.ingegneriadelsoftware.ProSki.Model.User;

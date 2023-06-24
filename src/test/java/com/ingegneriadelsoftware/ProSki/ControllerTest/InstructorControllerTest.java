@@ -141,7 +141,7 @@ public class InstructorControllerTest {
     @WithMockUser
     public void givenString_CreateMessageToInstructor_ReturnOk() throws Exception {
         String response = "Inserimento avvenuto con successo";
-        given(instructorService.insertInstructor(any())).willReturn(response);
+        given(instructorService.createMessage(any(), any())).willReturn(response);
         MessageRequest messageRequest = Stub.getMessageRequestStub();
         String instructorRequestAsString = new ObjectMapper().writeValueAsString(messageRequest);
         mvc.perform(MockMvcRequestBuilders.post("/api/v1/instructor/create/message")
@@ -163,7 +163,7 @@ public class InstructorControllerTest {
     @Test
     @WithMockUser
     public void givenString_CreateMessageToInstructor_ReturnBadRequest() throws Exception {
-        given(instructorService.insertInstructor(any())).willThrow(new IllegalStateException());
+        given(instructorService.createMessage(any(), any())).willThrow(new IllegalStateException());
         MessageRequest messageRequest = Stub.getMessageRequestStub();
         messageRequest.setUsername("");
         String instructorRequestAsString = new ObjectMapper().writeValueAsString(messageRequest);
@@ -186,7 +186,7 @@ public class InstructorControllerTest {
     @WithMockUser
     public void givenString_CreateCommentToInstructor_ReturnOk() throws Exception {
         String response = "Inserimento avvenuto con successo";
-        given(instructorService.insertInstructor(any())).willReturn(response);
+        given(instructorService.createCommentToMessage(any(), any())).willReturn(response);
         CommentRequest commentRequest = Stub.getCommentRequestStub();
         String commentInstructorRequestAsString = new ObjectMapper().writeValueAsString(commentRequest);
         mvc.perform(MockMvcRequestBuilders.post("/api/v1/instructor/create/comment")
@@ -207,7 +207,7 @@ public class InstructorControllerTest {
     @Test
     @WithMockUser
     public void givenString_CreateCommentToInstructor_ReturnBadRequest() throws Exception {
-        given(instructorService.insertInstructor(any())).willThrow(new IllegalStateException());
+        given(instructorService.createCommentToMessage(any(), any())).willThrow(new IllegalStateException());
         CommentRequest commentRequest = Stub.getCommentRequestStub();
         commentRequest.setComment("");
         String commentInstructorRequestAsString = new ObjectMapper().writeValueAsString(commentRequest);
@@ -379,7 +379,4 @@ public class InstructorControllerTest {
                         .content(messageDTORequestAsString))
                 .andExpect(status().isForbidden());
     }
-
-
-
 }
