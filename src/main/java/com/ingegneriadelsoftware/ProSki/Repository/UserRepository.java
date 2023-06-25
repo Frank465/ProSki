@@ -17,6 +17,8 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     Optional<User> findUserByEmail(String email);
 
+    List<User> findAllByEnable(boolean enable);
+
     @Transactional
     @Modifying
     @Query("UPDATE User a " +
@@ -25,7 +27,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     Optional<User> findByToken(String token);
 
-    List<User> findAllByGender(Gender gender);
+    List<User> findAllByGenderAndEnable(Gender gender, boolean enable);
 
-    List<User> findAllByDateBirthBetween(LocalDate startAge, LocalDate endAge);
+    List<User> findAllByDateBirthBetweenAndEnable(LocalDate startAge, LocalDate endAge, boolean anable);
 }

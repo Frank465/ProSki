@@ -66,16 +66,6 @@ public class LessonControllerTest {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(SecurityMockMvcConfigurers.springSecurity()).build();
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/create")
-    public ResponseEntity<?> createLesson(@Valid @RequestBody LessonRequest request) {
-        try{
-            return ResponseEntity.ok(DTOManager.toLessonResponseByLesson(lessonService.createLesson(request)));
-        } catch (IllegalStateException | EntityNotFoundException | DateTimeException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     /**
      * Questo test verifica che l'endpoint per la creazione di una lezione restituisca lo stato "OK" (200)
      * quando viene chiamato con un utente autenticato come amministratore.

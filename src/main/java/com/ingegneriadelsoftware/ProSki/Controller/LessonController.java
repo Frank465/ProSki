@@ -3,6 +3,7 @@ package com.ingegneriadelsoftware.ProSki.Controller;
 import com.ingegneriadelsoftware.ProSki.DTO.DTOManager;
 import com.ingegneriadelsoftware.ProSki.DTO.Request.LessonRequest;
 import com.ingegneriadelsoftware.ProSki.Service.LessonService;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class LessonController {
     public ResponseEntity<?> createLesson(@Valid @RequestBody LessonRequest request) {
         try{
             return ResponseEntity.ok(DTOManager.toLessonResponseByLesson(lessonService.createLesson(request)));
-        } catch (IllegalStateException | EntityNotFoundException | DateTimeException ex) {
+        } catch (IllegalStateException | EntityNotFoundException | DateTimeException | MessagingException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

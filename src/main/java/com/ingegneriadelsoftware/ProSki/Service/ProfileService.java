@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -54,7 +55,7 @@ public class ProfileService {
         if(Period.between(dateBirth, LocalDate.now()).getYears() < 18 || dateBirth.isAfter(LocalDate.now()))
             throw new IllegalStateException("Errore data di nascita");
         //Controllo sesso inserito, il primo controllo si fa nel DTO per quanto riguarda la stringa, qui si associa solo
-        if(request.getGender().equalsIgnoreCase("uomo"))
+        if(request.getGender().equalsIgnoreCase("man"))
             gender = Gender.MAN;
         else
             gender = Gender.WOMAN;
@@ -117,6 +118,26 @@ public class ProfileService {
                 user,
                 new Date(System.currentTimeMillis() + 1000 * 3600 * 24)
         );
+
+        //Se è l'admin ad aver eseguito il login faccio il setup del Data Base
+        if(user.getAuthorities().toString().contains("ADMIN"))
+            setupUsers();
+
         return AuthenticationResponse.builder().token(jwtToken).build();
+    }
+
+    /**
+     * Il metodo elimina tutti gli utenti che non hanno confermato la registrazione e che il token
+     * fornito nel momento della registrazione (durata 15 minuti) sia scaduto
+     */
+    public void setupUsers() {
+        List<User> userList = userRepository.findAllByEnable(false);
+        userList.forEach( cur -> {
+            try {
+                jwtUtils.isTokenExpired(cur.getToken());
+            }catch (ExpiredJwtException e) {
+                userRepository.delete(cur);
+            }
+        });
     }
 }

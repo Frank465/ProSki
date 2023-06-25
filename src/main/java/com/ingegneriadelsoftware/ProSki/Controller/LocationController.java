@@ -74,7 +74,7 @@ public class LocationController {
     public ResponseEntity<String> createSkipass(@Valid @RequestBody CardSkipassRequest request) {
         try {
             return ResponseEntity.ok(locationService.createSkipass(request));
-        }catch (IllegalStateException e) {
+        }catch (IllegalStateException | EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -91,7 +91,7 @@ public class LocationController {
     public ResponseEntity<String> createMessageToLocation(@Valid @RequestBody MessageRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(locationService.createMessage(request, httpRequest));
-        } catch(IllegalStateException e) {
+        } catch(IllegalStateException | EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

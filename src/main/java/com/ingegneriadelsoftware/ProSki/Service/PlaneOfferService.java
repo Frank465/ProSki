@@ -39,31 +39,38 @@ public class PlaneOfferService {
     public Offer createOffer(OfferRequest request) {
         //Controllo ed eventuale eliminazione delle offerte scadute
         Iterable<Offer> offerte = offerRepository.findAll();
-        for(Offer offer : offerte) {
-            if(offer.getDate().isBefore(LocalDate.now()))
+        for (Offer offer : offerte) {
+            if (offer.getDate().isBefore(LocalDate.now()))
                 offerRepository.delete(offer);
         }
         //Controllo esistenza del piano per inserimento offerta
         Plan plan = getPlanByName(request.getPlan());
         //Controllo data
         LocalDate data = Utils.formatterData(request.getDate());
-        if(data.isBefore(LocalDate.now())) throw new IllegalStateException("La data inserita non è valida");
+        if (data.isBefore(LocalDate.now())) throw new IllegalStateException("La data inserita non è valida");
         //Controllo esistenza offerta per il piano
         List<Offer> offerPlan = plan.getOffer();
         offerPlan.forEach(cur -> {
-            if(request.getName().equalsIgnoreCase(cur.getName()))
-                throw new IllegalStateException("L'offerta " + request.getName() + " è già presente per il piano " + cur.getName());
+            if (request.getName().equalsIgnoreCase(cur.getName()))
+                throw new IllegalStateException("L'offerta " + request.getName() + " è già presente per il piano " + cur.getPlan().getName());
         });
-        //Creazione offerta
-        Offer newOffer = new Offer(request.getName(), data, request.getDiscount(), plan);
         //Invio email della notifica offerta a tutti gli utenti iscritti al piano
         List<User> utentiPiano = plan.getUsers();
         utentiPiano.forEach( cur -> {
             CreatorEmail email = new OfferCreatorEmail(cur.getUsername(), request.getDate());
             emailSender.send(cur.getEmail(), email.render());
         });
-        offerRepository.save(newOffer);
-        return newOffer;
+        //Controllo se offerta esiste e la associo al piano, altrimenti la creo
+        Optional<Offer> offerExist = offerRepository.findByName(String.valueOf(request.getName()).toLowerCase());
+        if (offerExist.isEmpty()) {
+            Offer newOffer = new Offer(String.valueOf(request.getName()).toLowerCase(), data, request.getDiscount(), plan);
+            offerRepository.save(newOffer);
+            return newOffer;
+        }
+        else {
+            offerRepository.save(offerExist.get());
+            return offerExist.get();
+        }
     }
 
     /**

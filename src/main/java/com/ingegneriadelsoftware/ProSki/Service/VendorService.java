@@ -72,7 +72,18 @@ public class VendorService {
         //Prende tutte le prenotazioni fatte per un rifornitore
         List<Reservation> reservationByVendor = reservationRepository.findAllByVendor(vendor);
         //Filtra tutte le prenotazioni che sono state effettuate dopo la data di nuova prenotazione e prima della data di fine nuova prenotazione
-        List<Reservation> reservationVendorForDate = reservationByVendor.stream().filter(cur -> !cur.getStartDate().isBefore(start) && !cur.getEndDate().isAfter(end)).toList();
+        //sono in tutto 8 casi poichè le date che si incrociano sono 4
+        List<Reservation> reservationVendorForDate = reservationByVendor.stream().filter(cur ->
+                   start.isEqual(cur.getStartDate())
+                           || end.isEqual(cur.getEndDate())
+                           || start.isEqual(cur.getEndDate())
+                           || end.isEqual(cur.getStartDate())
+                || (start.isAfter(cur.getStartDate()) && start.isBefore(cur.getEndDate()))
+                || (cur.getStartDate().isAfter(start) && cur.getStartDate().isBefore(end))
+                || (end.isAfter(cur.getStartDate()) && end.isBefore(cur.getEndDate()))
+                || (cur.getEndDate().isAfter(start) && cur.getEndDate().isBefore(end))
+
+        ).toList();
         //Prendo tutti gli sci e gli snowboard del rifornitore
         List<Ski> skiVendor = skiRepository.findByVendor(vendor);
         List<Snowboard> snowboardsVendor = snowboardRepository.findByVendor(vendor);

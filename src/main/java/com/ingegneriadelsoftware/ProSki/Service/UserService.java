@@ -243,7 +243,7 @@ public class UserService implements UserDetailsService {
         //Conversione Data da Integer a LocalDate, considerando che gli utenti più grandi hanno una data di nascita meno recente
         LocalDate endDateBirth = LocalDate.now().minusYears(startAge);
         LocalDate startDateBirth = LocalDate.now().minusYears(endAge);
-        List<User> users = userRepository.findAllByDateBirthBetween(startDateBirth, endDateBirth);
+        List<User> users = userRepository.findAllByDateBirthBetweenAndEnable(startDateBirth, endDateBirth, true);
         //Filtra per soli utenti registrati
         List<User> usersRegister = users.stream().filter(User::isEnable).toList();
         if(usersRegister.isEmpty()) throw new IllegalStateException("Non è stato trovato nessun utente con queste eta");
@@ -253,7 +253,7 @@ public class UserService implements UserDetailsService {
     public List<User> getAllUsersByGender(String gender) {
         if(!gender.equalsIgnoreCase("man") && !gender.equalsIgnoreCase("woman"))
             throw new IllegalStateException("Sono permessi valori come man o woman");
-        return userRepository.findAllByGender(Gender.valueOf(gender.toUpperCase()));
+        return userRepository.findAllByGenderAndEnable(Gender.valueOf(gender.toUpperCase()), true);
     }
 
     public String deleteUserByEmail(String email) {

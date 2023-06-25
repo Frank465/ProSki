@@ -14,6 +14,7 @@ import com.ingegneriadelsoftware.ProSki.Repository.InstructorRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.LocationRepository;
 import com.ingegneriadelsoftware.ProSki.Repository.UserRepository;
 import com.ingegneriadelsoftware.ProSki.Utils.Utils;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -46,12 +47,12 @@ public class LessonService {
      * @throws DateTimeException
      */
     @Transactional
-    public Lesson createLesson(LessonRequest request) throws EntityNotFoundException, DateTimeException {
+    public Lesson createLesson(LessonRequest request) throws EntityNotFoundException, DateTimeException, MessagingException {
         //Conversione ore da stringa a LocalDateTime
         LocalDateTime startLesson = Utils.formatterDataTime(request.getStartLesson());
         LocalDateTime endLesson = Utils.formatterDataTime(request.getEndLesson());
-        if(!startLesson.isAfter(LocalDateTime.now()) || endLesson.isBefore(startLesson))
-            throw new IllegalStateException("Le data di inizio deve essere nel futuro e non può precedere la data di fine");
+        if(!startLesson.isAfter(LocalDateTime.now()) || !endLesson.isAfter(startLesson))
+            throw new IllegalStateException("Le data di inizio deve essere nel futuro e non può precedere la data di fine o essere uguale");
         //Verifica data lezione con le altre lezioni del maestro
         Instructor instructor = instructorRepository.findByEmail(request.getInstructorEmail())
                 .orElseThrow(()->new EntityNotFoundException("Il maestro non esiste"));
@@ -92,7 +93,6 @@ public class LessonService {
     public boolean dataIsValid(List<Lesson> list, LocalDateTime inizio, LocalDateTime fine) {
         for(Lesson elem : list) {
             if (inizio.isEqual(elem.getStartLesson())
-                    || inizio.isEqual(fine)
                     || !(inizio.isBefore(elem.getStartLesson()) && fine.isBefore(elem.getStartLesson())
                     || inizio.isAfter(elem.getEndLesson())))
                 return false;

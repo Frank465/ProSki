@@ -123,7 +123,7 @@ public class LocationService {
      * @param httpServletRequest
      * @return
      */
-    public String createMessage(MessageRequest request, HttpServletRequest httpServletRequest) {
+    public String createMessage(MessageRequest request, HttpServletRequest httpServletRequest)  {
         //Controllo esistenza utente
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
         controlUserLocation(request.getUsername(), user);
