@@ -13,6 +13,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+
+/**
+ * Questa classe definisce la configurazione dell'applicazione Spring Security.
+ * In particolare, definisce un AuthenticationManager e un UserDetailsService personalizzati,
+ * che vengono utilizzati per autenticare gli utenti e gestire le autorizzazioni.
+  */
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {

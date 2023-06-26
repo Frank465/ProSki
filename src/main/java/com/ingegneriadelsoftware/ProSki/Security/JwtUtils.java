@@ -2,7 +2,6 @@ package com.ingegneriadelsoftware.ProSki.Security;
 
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
-import com.ingegneriadelsoftware.ProSki.Utils.Utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,7 +14,12 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
-
+/**
+ * Questa classe fornisce metodi per generare e verificare JSON Web Token (JWT).
+ * Utilizza la libreria JJWT per la creazione e la decodifica dei token.
+ * La chiave segreta utilizzata per la firma dei token è specificata come costante all'interno della classe.
+ * Inoltre, la classe fornisce metodi per estrarre informazioni dal token, come l'username dell'utente autenticato.
+ */
 @Component
 public class JwtUtils {
 
@@ -112,15 +116,5 @@ public class JwtUtils {
         //Nel header il token si trova nella posizione dopo la 7
         String jwt = authHeader.substring(7);
         return exctractUsername(jwt);
-    }
-
-    public void invalidToken(HttpServletRequest request, UserService userService) {
-        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
-        String authHeader = request.getHeader("Authorization");
-        //Nel header il token si trova nella posizione dopo la 7
-        String jwt = authHeader.substring(7);
-        String username = exctractUsername(jwt);
-        User user = (User) userService.loadUserByUsername(username);
-        user.setAccountExpired(true);
     }
 }

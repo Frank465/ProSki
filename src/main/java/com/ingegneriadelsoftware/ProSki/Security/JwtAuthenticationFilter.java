@@ -27,7 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userDetailsService;
 
     /**
-     * Il primo fitro che fa i controlli sul tipo di richiesta, sugli utenti e sui token
+     * Il primo fitro che fa i controlli sul tipo di richiesta, sugli utenti e sui token.
+     * Questa classe definisce un filtro per l'autenticazione JWT.
+     * Il primo fitro che fa i controlli sul tipo di richiesta, sugli utenti e sui token.
+     * Il filtro controlla se la richiesta contiene un token JWT valido e, in tal caso,
+     * autentica l'utente corrispondente e aggiorna il SecurityContextHolder.
+     * Se il token non è valido o mancante, la richiesta viene passata al filtro successivo.
+     *
      * @param request
      * @param response
      * @param filterChain

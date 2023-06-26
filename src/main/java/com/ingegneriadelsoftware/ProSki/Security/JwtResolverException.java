@@ -11,6 +11,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Questa classe definisce un filtro per la risoluzione delle eccezioni JWT.
+ * Il filtro controlla se la richiesta contiene un token JWT scaduto e, in tal caso,
+ * restituisce una risposta HTTP 401 (Unauthorized) con un messaggio di errore.
+ * In caso contrario, la richiesta viene passata al filtro successivo.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtResolverException extends OncePerRequestFilter {
