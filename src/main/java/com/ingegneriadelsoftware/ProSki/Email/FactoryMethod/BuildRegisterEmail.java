@@ -2,6 +2,10 @@ package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
 import lombok.RequiredArgsConstructor;
 
+
+/**
+ * La classe concreta di crea una mail apposita per la registrazione degli utenti
+ */
 @RequiredArgsConstructor
 public class BuildRegisterEmail implements BuildEmail {
     private final String name;

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Classe concreta per la pubblicazione dei messaggi e dei commenti per il forum di una location
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Component

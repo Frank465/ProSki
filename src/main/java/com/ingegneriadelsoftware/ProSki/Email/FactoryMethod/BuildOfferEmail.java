@@ -1,8 +1,10 @@
 package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
-import com.ingegneriadelsoftware.ProSki.Email.FactoryMethod.BuildEmail;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * La classe concreta di crea una mail apposita per le offerte
+ */
 @RequiredArgsConstructor
 public class BuildOfferEmail implements BuildEmail {
     private final String userName;

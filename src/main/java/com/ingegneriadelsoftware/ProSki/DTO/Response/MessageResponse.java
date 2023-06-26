@@ -14,7 +14,8 @@ import java.util.List;
 @Builder
 public class MessageResponse {
 
-    private Integer idLocation;
+    //Nei tre casi questo può essere: emailIstruttore, nome località, email riforniore
+    private String username;
 
     private List<MessageDTO> listMessage;
 

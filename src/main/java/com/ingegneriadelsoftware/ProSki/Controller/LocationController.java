@@ -107,7 +107,7 @@ public class LocationController {
     public ResponseEntity<?> createCommentToLocationMessage(@Valid @RequestBody CommentRequest request, HttpServletRequest httpRequest) {
         try {
             return ResponseEntity.ok(locationService.createCommentToMessage(request, httpRequest));
-        } catch(IllegalStateException e) {
+        } catch(IllegalStateException | EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

@@ -10,6 +10,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * LA classe invia email che hanno differenti corpi, si utilizza javaMailsSender e queste mail vengono visualizzate su maildev
+ */
 @Component
 @AllArgsConstructor
 public class EmailComponent implements EmailSender {

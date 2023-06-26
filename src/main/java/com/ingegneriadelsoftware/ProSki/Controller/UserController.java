@@ -8,6 +8,7 @@ import com.ingegneriadelsoftware.ProSki.DTO.Response.BuySkipassResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.LessonResponse;
 import com.ingegneriadelsoftware.ProSki.DTO.Response.ReservationResponse;
 import com.ingegneriadelsoftware.ProSki.Model.Lesson;
+import com.ingegneriadelsoftware.ProSki.Model.Reservation;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +45,24 @@ public class UserController {
                 lessonsResponse.add(DTOManager.toLessonResponseByLesson(cur));
             });
             return ResponseEntity.ok(lessonsResponse);
+        }catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    /**
+     * Il metodo ritorna tutte le prenotazioni che l'utente ha fatto
+     * @param servletRequest
+     * @return
+     */
+    @GetMapping("/getAll/reservations")
+    public ResponseEntity<?> getAllReservationByUser(HttpServletRequest servletRequest) {
+        List<ReservationResponse> reservationResponses = new ArrayList<>();
+        try{
+            List<Reservation> reservations = userService.getReservationByUser(servletRequest);
+            reservations.forEach(cur-> {
+                reservationResponses.add(DTOManager.toReservationResponseByReservation(cur));
+            });
+            return ResponseEntity.ok(reservationResponses);
         }catch(EntityNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }

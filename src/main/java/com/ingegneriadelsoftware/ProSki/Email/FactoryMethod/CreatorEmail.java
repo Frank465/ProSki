@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * Classe astratta che
+ * Classe astratta che quando viene chiamato il metodo render richiama le classi concrete del tipo runtime
+ * facendo il createEmail() apposito e poi viene eseguito il metodo render.
  */
 @Component
 public abstract class CreatorEmail {

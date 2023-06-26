@@ -98,10 +98,23 @@ public class UserService implements UserDetailsService {
      * @param httpServletRequest
      * @return
      */
-    public List<Lesson> getLessonsByUser(HttpServletRequest httpServletRequest) throws EntityNotFoundException {
+    public List<Lesson> getLessonsByUser(HttpServletRequest httpServletRequest) {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
+        if(user.getUsersLessons().isEmpty()) throw new EntityNotFoundException("Non sono presenti lezioni per l'utente " + user.getEmail());
         return user.getUsersLessons();
+    }
+
+    /**
+     * trova tutte le prenotazioni di un utente
+     * @param httpServletRequest
+     * @return
+     */
+    public List<Reservation> getReservationByUser(HttpServletRequest httpServletRequest) {
+        //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
+        User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
+        if(user.getReservations().isEmpty()) throw new EntityNotFoundException("Non sono presenti prenotazioni per l'utente " + user.getEmail());
+        return user.getReservations();
     }
 
     /**
@@ -190,6 +203,8 @@ public class UserService implements UserDetailsService {
     public Reservation createReservation(ReservationRequest reservationRequest, HttpServletRequest servletRequest) throws DateTimeException {
         //Prendo l'email dal token presente nella ServletRequest e da questo ricavo l'utente che sta effettuando la prenotazione
         User user = Utils.getUserFromHeader(servletRequest, userRepository, jwtUtils);
+        if(reservationRequest.getSnowboardsList() == null && reservationRequest.getSkisList() == null)
+            throw new IllegalStateException("Snowboard e sci sono entrambi null");
         //Conversione Date da stringa a LocalDate
         LocalDate startDateReservation = Utils.formatterData(reservationRequest.getStartDate());
         LocalDate endDateReservation = Utils.formatterData(reservationRequest.getEndDate());

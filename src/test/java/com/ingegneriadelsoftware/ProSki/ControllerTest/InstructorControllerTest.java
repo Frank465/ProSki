@@ -232,7 +232,7 @@ public class InstructorControllerTest {
         given(instructorService.getAllMessage(any())).willReturn(messageResponse);
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/instructor/get/all/message/"+instructor.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idLocation", is(1)));
+                .andExpect(jsonPath("$.username", is(messageResponse.getUsername())));
     }
 
     /**

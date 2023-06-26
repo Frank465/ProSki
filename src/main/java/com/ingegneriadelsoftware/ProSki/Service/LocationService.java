@@ -145,7 +145,11 @@ public class LocationService {
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
         //Controllo che l'utente abbia effettuato una prenotazione dal rifornitore
         controlUserLocation(request.getUsername(), user);
-        LocationMessage locationMessage = locationMessageRepository.findById(request.getIdMessage()).orElseThrow(()-> new IllegalStateException("Il messaggio indicato non esiste"));
+        //Prendo tutti i messaggi per la location id specificata
+        List<LocationMessage> locationMessage = locationMessageRepository.findAllByLocation(getLocalitaByName(request.getUsername()));
+        //Li filtro per id cercare se è presente il messaggio su cui si vuole scrivere il commento
+        List<LocationMessage> filterMessage = locationMessage.stream().filter(cur -> cur.getMessageId() == request.getIdMessage()).toList();
+        if(filterMessage.isEmpty()) throw new EntityNotFoundException("Il messaggio indicato per la località " + request.getUsername() + " non esiste");
         //Set della strategia di publicazione del commento
         context.setPublishingStrategy(new ConcreteStrategyLocation(locationRepository, locationMessageRepository, locationCommentRepository));
         //Eseguo la strategia di pubblicazione del messaggio per il rifornitore
@@ -165,7 +169,9 @@ public class LocationService {
         List<CardSkipass> cardsSkipass = location.getCardSkipasses();
         if(cardsSkipass.isEmpty()) throw new IllegalStateException("Non ci sono card per la località " + location.getName());
         List<BuySkipass> userBuySkipass = buySkipassRepository.findAllByUser(user);
-        if(userBuySkipass.isEmpty()) throw new IllegalStateException("L'utente non ha ancora acquistato skipass per questa località" + location.getName());
+        //Filtro gli acquisti degli skipass per un solo utente in una località
+        List<BuySkipass> buySkipassInLocation = userBuySkipass.stream().filter(cur -> (cur.getCardSkipass().getLocation()).equals(location)).toList();
+        if(buySkipassInLocation.isEmpty()) throw new IllegalStateException("L'utente non ha ancora acquistato skipass per questa località " + location.getName());
     }
 
     /**
@@ -188,7 +194,7 @@ public class LocationService {
             } );
             messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
-        return MessageResponse.builder().idLocation(idLocation).listMessage(messageDTOS).build();
+        return MessageResponse.builder().username(location.getName()).listMessage(messageDTOS).build();
     }
 
     /**

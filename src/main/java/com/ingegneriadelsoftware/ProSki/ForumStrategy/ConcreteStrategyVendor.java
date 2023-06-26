@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Classe concreta per la pubblicazione dei messaggi e dei commenti per il forum di un vendor
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Component

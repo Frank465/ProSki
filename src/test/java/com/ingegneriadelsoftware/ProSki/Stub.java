@@ -120,7 +120,7 @@ public class Stub {
 
     public static MessageResponse getMessageResponseStub() {
         MessageResponse messageResponse = new MessageResponse();
-        messageResponse.setIdLocation(1);
+        messageResponse.setUsername(getJwtStub_User());
         messageResponse.setListMessage(getMessageDTOListStub());
         return messageResponse;
     }
@@ -234,6 +234,16 @@ public class Stub {
             userList.add(user);
         }
         return userList;
+    }
+
+    public static List<Reservation> getReservationListStub() {
+        List<Reservation> reservations = new ArrayList<>();
+        for(int i = 1; i < 10; i++) {
+            Reservation reservation = getReservationStub();
+            reservation.setReservationId(i);
+            reservations.add(reservation);
+        }
+        return reservations;
     }
 
     public static Reservation getReservationStub() {

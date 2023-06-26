@@ -14,13 +14,16 @@ import com.ingegneriadelsoftware.ProSki.Model.*;
 import com.ingegneriadelsoftware.ProSki.Service.UserService;
 import com.ingegneriadelsoftware.ProSki.Stub;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
@@ -175,6 +179,60 @@ public class UserControllerTest {
                 .content(requestUserPlanAsString))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(response));
+    }
+
+    /**
+     * Il metodo testa passato un utenete il corretto ritorno di tutte le lezioni a cui egli è iscritto.
+     * Per tanto attraverso l'annotation withMaockerUser si da l'autorizzazione.
+     * Vengono creati dei mock per le prenotazioni dell'utente con valori corretti e a partire da queste viene creata una
+     * lista verosimile di ReservationResonse. Viene chiamato il metodo contenuto nel service di utente getReservationsByUser()
+     * al quale viene passato un qualsisai valore corretto, questo ci aspettiamo che ritorni una List<Reservation>
+     * Infine viene eseguito il perform di mockito con una get all'indirizzo indicato, ci si aspetta che la risposta alla
+     * chiama abbia un 200 Ok e che i parametri siano quelli che mi aspettavo ritornassero contenuti in un ResponseEntity
+     * @throws Exception
+     */
+    @Test
+    @WithMockUser
+    public void givenReservationResponseDTO_GetAllReservationByUser_ReturnOk() throws Exception {
+        List<Reservation> reservations = Stub.getReservationListStub();
+        List<ReservationResponse> reservationResponses = new ArrayList<>();
+        reservations.forEach(cur -> reservationResponses.add(Response.toReservationResponseByReservationMapper(cur)));
+        given(userService.getReservationByUser(any())).willReturn(reservations);
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/user/getAll/reservations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userName", is(reservationResponses.get(0).getUserName())))
+                .andExpect(jsonPath("$[1].userName", is(reservationResponses.get(1).getUserName())))
+                .andExpect(jsonPath("$[2].userName", is(reservationResponses.get(2).getUserName())))
+                .andExpect(jsonPath("$[3].userName", is(reservationResponses.get(3).getUserName())))
+                .andExpect(jsonPath("$[4].userName", is(reservationResponses.get(4).getUserName())))
+                .andExpect(jsonPath("$[5].userName", is(reservationResponses.get(5).getUserName())))
+                .andExpect(jsonPath("$[6].userName", is(reservationResponses.get(6).getUserName())));
+    }
+
+    /**
+     * Il metodo testa passato un utenete il corretto ritorno di tutte le lezioni a cui egli è iscritto.
+     * Per tanto attraverso l'annotation withMaockerUser si da l'autorizzazione.
+     * Vengono creati dei mock per le prenotazioni dell'utente con valori sbagliati e a partire da queste viene creata una
+     * lista verosimile di ReservationResonse. Viene chiamato il metodo contenuto nel service di utente getReservationsByUser()
+     * al quale viene passato un qualsisai valore corretto, in questo caso ci aspettiamo che qualcosa vada storto poiche
+     * non sono corretti dei valori in input e che il metodo sollevi eccezione.
+     * Infine viene eseguito il perform di mockito con una get all'indirizzo indicato, ci si aspetta che la risposta alla
+     * chiama abbia un 400 BadRequest
+     * @throws Exception
+     */
+    @Test
+    @WithMockUser
+    public void givenReservationResponseDTO_GetAllReservationByUser_ReturnBadRequest() throws Exception {
+        List<Reservation> reservations = Stub.getReservationListStub();
+        List<ReservationResponse> reservationResponses = new ArrayList<>();
+        String response = "Errore, dati incosistenti";
+        reservations.forEach(cur -> reservationResponses.add(Response.toReservationResponseByReservationMapper(cur)));
+        given(userService.getReservationByUser(any())).willThrow(new EntityNotFoundException(response));
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/user/getAll/reservations"))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string(response));
+
+
     }
 
     /**

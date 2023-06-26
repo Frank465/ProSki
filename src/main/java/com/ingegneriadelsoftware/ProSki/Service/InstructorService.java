@@ -86,7 +86,10 @@ public class InstructorService {
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
         //Controllo che l'utente abbia effettuato una prenotazione dal rifornitore
         controlUserInstructor(request.getUsername(), user);
-        InstructorMessage instructorMessage = instructorMessageRepository.findById(request.getIdMessage()).orElseThrow(()-> new IllegalStateException("Il messaggio indicato non esiste"));
+        List<InstructorMessage> instructorMessage = instructorMessageRepository.findAllByInstructor(getInstructorByEmail(request.getUsername()));
+        //Li filtro per id cercare se è presente il messaggio su cui si vuole scrivere il commento
+        List<InstructorMessage> filterMessage = instructorMessage.stream().filter(cur -> cur.getMessageId() == request.getIdMessage()).toList();
+        if(filterMessage.isEmpty()) throw new EntityNotFoundException("Il messaggio indicato per l'struttore " + request.getUsername() + " non esiste");
         //Set della strategia di publicazione del commento
         context.setPublishingStrategy(new ConcreteStrategyInstructor(instructorRepository, instructorMessageRepository, instructorCommentRepository));
         //Eseguo la strategia di pubblicazione del messaggio per il rifornitore
@@ -112,7 +115,7 @@ public class InstructorService {
                 break;
             }
         }
-        if(!isPresent) throw new IllegalStateException("L'utente non ha svolto una lezione con il maestro " + instructor.getName());
+        if(!isPresent) throw new EntityNotFoundException("L'utente non ha svolto una lezione con il maestro " + instructor.getName());
     }
 
     /**
@@ -133,7 +136,7 @@ public class InstructorService {
             } );
             messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
-        return MessageResponse.builder().idLocation(idMaestro).listMessage(messageDTOS).build();
+        return MessageResponse.builder().username(instructor.getEmail()).listMessage(messageDTOS).build();
     }
 
     /**
@@ -164,10 +167,10 @@ public class InstructorService {
         if(request.getComments().isEmpty()) throw new IllegalStateException("Non ci sono commenti selezionati");
         InstructorMessage message = instructorMessageRepository.findById(request.getIdMessage())
                 .orElseThrow(()-> new EntityNotFoundException("Il messaggio indicato non esiste"));
-        List<InstructorComment> comments = new ArrayList<>();
-        request.getComments().forEach(cur -> comments.add(instructorCommentRepository.findById(cur.getId())
-                .orElseThrow(()-> new EntityNotFoundException("Un dei commenti indicati non esiste"))));
-        instructorCommentRepository.deleteAll(comments);
+        request.getComments().forEach(cur -> {
+            InstructorComment instructorComment =  instructorCommentRepository.findById(cur.getId()).orElseThrow(()-> new EntityNotFoundException("Un dei commenti indicati non esiste"));
+            instructorCommentRepository.delete(instructorComment);
+        });
         return MessageDTO.builder()
                 .idMessage(message.getMessageId())
                 .comments(request.getComments())

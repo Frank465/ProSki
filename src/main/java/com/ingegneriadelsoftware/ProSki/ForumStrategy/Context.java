@@ -3,6 +3,9 @@ package com.ingegneriadelsoftware.ProSki.ForumStrategy;
 import com.ingegneriadelsoftware.ProSki.Model.User;
 import org.springframework.stereotype.Component;
 
+/**
+ * Context del pattern strategy dove vengono settate le tipo di strategie per ogni classe concreta ed eseguite
+ */
 @Component
 public class Context {
 

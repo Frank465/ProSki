@@ -2,6 +2,10 @@ package com.ingegneriadelsoftware.ProSki.Email.FactoryMethod;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * La classe concreta di crea una mail apposita per le lezioni
+ */
+
 @RequiredArgsConstructor
 public class BuildLessonEmail implements BuildEmail {
     private final String InstructorName;

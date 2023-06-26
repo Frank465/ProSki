@@ -71,17 +71,18 @@ public class VendorService {
             throw new DateTimeException("Errore nelle date della prenotazione, prenotazione fallita");
         //Prende tutte le prenotazioni fatte per un rifornitore
         List<Reservation> reservationByVendor = reservationRepository.findAllByVendor(vendor);
-        //Filtra tutte le prenotazioni che sono state effettuate dopo la data di nuova prenotazione e prima della data di fine nuova prenotazione
-        //sono in tutto 8 casi poichè le date che si incrociano sono 4
-        List<Reservation> reservationVendorForDate = reservationByVendor.stream().filter(cur ->
+        //Filtra tutte le prenotazioni che sono state effettuate dopo la data di nuova prenotazione
+        // e prima della data di fine nuova prenotazione sono in tutto 8 casi le date che si incrociano sono 4
+        List<Reservation> reservationVendorForDate = reservationByVendor.stream().filter(
+                cur ->
                    start.isEqual(cur.getStartDate())
-                           || end.isEqual(cur.getEndDate())
-                           || start.isEqual(cur.getEndDate())
-                           || end.isEqual(cur.getStartDate())
-                || (start.isAfter(cur.getStartDate()) && start.isBefore(cur.getEndDate()))
-                || (cur.getStartDate().isAfter(start) && cur.getStartDate().isBefore(end))
-                || (end.isAfter(cur.getStartDate()) && end.isBefore(cur.getEndDate()))
-                || (cur.getEndDate().isAfter(start) && cur.getEndDate().isBefore(end))
+                   || end.isEqual(cur.getEndDate())
+                   || start.isEqual(cur.getEndDate())
+                   || end.isEqual(cur.getStartDate())
+                   || (start.isAfter(cur.getStartDate()) && start.isBefore(cur.getEndDate()))
+                   || (cur.getStartDate().isAfter(start) && cur.getStartDate().isBefore(end))
+                   || (end.isAfter(cur.getStartDate()) && end.isBefore(cur.getEndDate()))
+                   || (cur.getEndDate().isAfter(start) && cur.getEndDate().isBefore(end))
 
         ).toList();
         //Prendo tutti gli sci e gli snowboard del rifornitore
@@ -184,7 +185,10 @@ public class VendorService {
         User user = Utils.getUserFromHeader(httpServletRequest, userRepository, jwtUtils);
         //Controllo che l'utente abbia effettuato una prenotazione dal rifornitore
         controlUserReservation(request.getUsername(), user);
-        VendorMessage vendorMessage = vendorMessageRepository.findById(request.getIdMessage()).orElseThrow(()-> new IllegalStateException("Il messaggio indicato non esiste"));
+        List<VendorMessage> vendorMessage = vendorMessageRepository.findAllByVendor(getVendorByEmail(request.getUsername()));
+        //Li filtro per id cercare se è presente il messaggio su cui si vuole scrivere il commento
+        List<VendorMessage> filterMessage = vendorMessage.stream().filter(cur -> cur.getMessageId() == request.getIdMessage()).toList();
+        if(filterMessage.isEmpty()) throw new EntityNotFoundException("Il messaggio indicato per il vendor " + request.getUsername() + " non esiste");
         //Set della strategia di publicazione del commento
         context.setPublishingStrategy(new ConcreteStrategyVendor(vendorRepository, vendorMessageRepository, vendorCommentRepository));
         //Eseguo la strategia di pubblicazione del messaggio per il rifornitore
@@ -226,7 +230,7 @@ public class VendorService {
             });
             messageDTOS.add(MessageDTO.builder().idMessage(cur.getMessageId()).user(cur.getUser().getUserId()).message(cur.getMessage()).comments(commentDTOS).build());
         });
-        return MessageResponse.builder().idLocation(idRifornitore).listMessage(messageDTOS).build();
+        return MessageResponse.builder().username(vendor.getEmail()).listMessage(messageDTOS).build();
     }
 
     /**

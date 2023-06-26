@@ -352,7 +352,7 @@ public class VendorControllerTest {
         given(vendorService.getAllMessage(any())).willReturn(messageResponse);
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/vendor/get/all/message/"+ vendor.getVendorId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idLocation", is(1)));
+                .andExpect(jsonPath("$.username", is(messageResponse.getUsername())));
     }
 
     /**
